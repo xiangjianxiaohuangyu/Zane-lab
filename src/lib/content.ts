@@ -71,6 +71,10 @@ async function loadProjects(): Promise<Content<ProjectFrontmatter>[]> {
  * 加载所有写作内容
  *
  * 从 content/writing/ 目录及其子目录加载所有 .md 文件
+ * 根据文件夹路径自动分配分类：
+ * - essays/ -> essay (随笔)
+ * - fiction/ -> fiction (小说)
+ * - annual/ -> annual (年度总结)
  * 按日期降序排列（最新的在前）
  *
  * @returns 写作内容数组
@@ -89,8 +93,27 @@ async function loadWriting(): Promise<Content<WritingFrontmatter>[]> {
       const slug = extractSlug(path);
       const parsed = await parseMarkdown(file);
 
+      // 根据文件夹路径自动分配分类
+      let category: 'essay' | 'annual' | 'fiction' = 'essay'; // 默认为随笔
+
+      if (path.includes('/fiction/')) {
+        category = 'fiction';
+      } else if (path.includes('/annual/')) {
+        category = 'annual';
+      } else if (path.includes('/essays/')) {
+        category = 'essay';
+      }
+
+      // 如果 frontmatter 中没有指定 category，使用自动分配的
+      // 如果已经指定，则保持原值（向后兼容）
+      const finalCategory = parsed.frontmatter.category || category;
+
       return {
         ...parsed,
+        frontmatter: {
+          ...parsed.frontmatter,
+          category: finalCategory,
+        },
         slug,
       } as Content<WritingFrontmatter>;
     })

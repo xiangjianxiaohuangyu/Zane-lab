@@ -4,6 +4,7 @@ description: "既不是假期，也没有凡事，坐在只是我单纯想要回
 date: "2023-01"
 category: "essay"
 tags: ["诗集"]
+statusColor: "pink"
 showToc: true
 ---
 

@@ -16,7 +16,6 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { TableOfContents } from '../components/ui/TableOfContents';
 import type { Content } from '../lib/types';
 import type { WritingFrontmatter } from '../lib/types';
-import { WRITING_CATEGORY_MAP } from '../lib/types';
 import type { TocItem } from '../lib/toc';
 
 /**
@@ -68,8 +67,11 @@ export function WritingDetail() {
   }
 
   const { frontmatter, content } = writing;
-  const categoryName = WRITING_CATEGORY_MAP[frontmatter.category] || frontmatter.category;
   const showToc = frontmatter.showToc && toc.length > 0;
+
+  // 判断是否为诗集（poetry），使用居中样式
+  const isPoetry = frontmatter.category === 'poetry';
+  const markdownStyle = isPoetry ? 'poetry' : 'writing';
 
   return (
     <div className="py-48">
@@ -84,12 +86,19 @@ export function WritingDetail() {
       {/* 文章头部信息 */}
       <div className="mb-6">
         <GlassCard className="!pt-4 !px-10 !pb-8">
-          {/* 分类标签 */}
-          <div className="mb-4">
-            <span className="inline-block px-4 py-2 rounded-full text-sm font-medium text-primary bg-glass-100">
-              {categoryName}
-            </span>
-          </div>
+          {/* 标签 */}
+          {frontmatter.tags && frontmatter.tags.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {frontmatter.tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant={frontmatter.statusColor || 'default'}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* 文章标题 */}
           <h1 className="text-5xl font-bold text-text-primary mb-4">
@@ -104,7 +113,7 @@ export function WritingDetail() {
           )} */}
 
           {/* 元数据 */}
-          <div className="flex flex-wrap items-center gap-4 mb-4">
+          <div className="flex flex-wrap items-center gap-4">
             {/* 发布日期 */}
             <div className="flex items-center gap-2">
               <svg
@@ -147,23 +156,12 @@ export function WritingDetail() {
               </div>
             )}
           </div>
-
-          {/* 标签 */}
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {frontmatter.tags.map((tag) => (
-                <Badge key={tag} variant="default">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
         </GlassCard>
       </div>
 
       {/* 文章内容 */}
       <GlassCard className="!px-10 !pt-4 !pb-8" hover={false}>
-        <MarkdownRenderer content={content} />
+        <MarkdownRenderer content={content} style={markdownStyle} />
       </GlassCard>
     </div>
   );

@@ -4,7 +4,7 @@ description: "坐在飞机上，看着阳光倾泻在云层上的时候，我总
 date: "2023-02-13"
 category: "essay"
 tags: ["思考"]
-
+statusColor: "blue"
 ---
 
 

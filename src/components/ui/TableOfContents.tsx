@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { TocItem } from '@/lib/toc';
 
 /**
@@ -68,10 +69,9 @@ export function TableOfContents({ toc }: TableOfContentsProps) {
     return null;
   }
 
-  return (
-    <nav className="hidden lg:block">
-      <div className="fixed left-8 top-86 w-38 max-h-[60vh] overflow-y-auto overflow-x-hidden">
-        <div className="py-4">
+  return createPortal(
+    <div className="hidden lg:block fixed left-8 top-32 w-38 max-h-[60vh] overflow-y-auto overflow-x-hidden">
+      <div className="py-4">
           <h4 className="text-sm font-semibold text-text-primary mb-3 px-2">
             目录
           </h4>
@@ -112,8 +112,8 @@ export function TableOfContents({ toc }: TableOfContentsProps) {
               </li>
             ))}
           </ul>
-        </div>
       </div>
-    </nav>
+    </div>,
+    document.body
   );
 }

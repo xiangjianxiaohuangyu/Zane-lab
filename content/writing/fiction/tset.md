@@ -1,10 +1,9 @@
 ---
-title: "我与你，永恒之间"
+title: "测试"
 description: "既不是假期，也没有凡事，坐在只是我单纯想要回家的高铁上时......"
 date: "2023-01"
-category: "poetry"
-tags: ["诗集"]
-statusColor: "pink"
+category: "fiction"
+tags: ["小说"]
 showToc: true
 ---
 

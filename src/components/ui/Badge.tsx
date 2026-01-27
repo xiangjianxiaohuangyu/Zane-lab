@@ -10,7 +10,7 @@ interface BadgeProps {
   className?: string;
 
   /** 标签变体 */
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'blue' | 'green' | 'white' | 'pink';
 }
 
 /**
@@ -23,6 +23,7 @@ interface BadgeProps {
  * ```tsx
  * <Badge variant="primary">React</Badge>
  * <Badge variant="success">已完成</Badge>
+ * <Badge variant="blue">蓝色标签</Badge>
  * ```
  */
 export function Badge({
@@ -37,6 +38,10 @@ export function Badge({
     success: 'bg-green-500/20 text-green-400 border-green-500/30',
     warning: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
     danger: 'bg-red-500/20 text-red-400 border-red-500/30',
+    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    green: 'bg-green-500/20 text-green-400 border-green-500/30',
+    white: 'bg-white/80 text-text-primary border-white/90',
+    pink: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
   };
 
   return (

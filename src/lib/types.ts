@@ -58,6 +58,9 @@ export interface WritingFrontmatter {
 
   /** 是否显示左侧目录导航（默认 false） */
   showToc?: boolean;
+
+  /** 标签状态颜色（可选）：blue, green, white, pink 等 */
+  statusColor?: 'blue' | 'green' | 'white' | 'pink' | 'default' | 'primary' | 'success' | 'warning' | 'danger';
 }
 
 /**
