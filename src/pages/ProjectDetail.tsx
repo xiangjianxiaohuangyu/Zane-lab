@@ -139,7 +139,7 @@ export function ProjectDetail() {
       </div>
 
       {/* 项目内容 */}
-      <GlassCard className="!px-10 !pt-4 !pb-8">
+      <GlassCard className="!px-10 !pt-4 !pb-8" hover={false}>
         <MarkdownRenderer content={content} />
       </GlassCard>
     </div>

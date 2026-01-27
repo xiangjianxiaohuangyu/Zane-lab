@@ -2,7 +2,7 @@
 # 部署命令: npx wrangler pages deploy dist --project-name=zane-lab
 
 name = "zane-lab"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-01-27"
 
 # Pages 项目配置
 pages_build_output_dir = "./dist"
