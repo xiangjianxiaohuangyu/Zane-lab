@@ -1,0 +1,268 @@
+/**
+ * 全局样式文件
+ *
+ * 包含 Tailwind CSS 指令和自定义全局样式
+ */
+
+/* 导入自定义玻璃拟态样式（必须在 @tailwind 之前） */
+@import './glassmorphism.css';
+
+/* 导入 Tailwind CSS 基础样式 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 基础样式层 */
+@layer base {
+  /* 根元素颜色定义 */
+  :root {
+    /* 背景色 */
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+
+    /* 文字色 */
+    --text-primary: #f0f0f5;
+    --text-secondary: #a0a0b0;
+
+    /* 主题色 */
+    --primary: #6366f1; /* Indigo-500 */
+    --primary-hover: #818cf8; /* Indigo-400 */
+  }
+
+  /* body 样式 */
+  body {
+    @apply bg-[#0a0a0f] text-[#f0f0f5] antialiased;
+    /* 深色背景 + 径向渐变效果 */
+    background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 50%);
+    min-height: 100vh;
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+  }
+
+  /* 选中文本样式 */
+  ::selection {
+    background: rgba(99, 102, 241, 0.3);
+    color: var(--text-primary);
+  }
+
+  /* 链接默认样式 */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* 标题样式 */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+    color: var(--text-primary);
+  }
+
+  /* 段落样式 */
+  p {
+    @apply leading-relaxed;
+    color: var(--text-secondary);
+  }
+}
+
+/* 组件样式层 */
+@layer components {
+  /* 容器最大宽度 */
+  .container {
+    @apply mx-auto px-6;
+    max-width: 1280px;
+  }
+
+  /* 响应式容器 */
+  @media (min-width: 640px) {
+    .container {
+      max-width: 640px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      max-width: 768px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      max-width: 1024px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container {
+      max-width: 1280px;
+    }
+  }
+
+  /* 按钮基础样式 */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: white;
+    transition: background-color 0.2s;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-hover);
+  }
+
+  .btn-secondary {
+    @apply bg-glass-200 text-text-primary hover:bg-glass-300;
+  }
+}
+
+/* 工具样式层 */
+@layer utilities {
+  /* 文本截断 */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* 淡入动画 */
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out;
+  }
+
+  /* 动画定义 */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 页面过渡动画 */
+  .page-transition {
+    animation: page-in 0.5s ease-out;
+  }
+
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* 卡片淡入上滑动画（支持延迟） */
+  .animated-fade-in-up {
+    opacity: 0;
+    animation: fade-in-up 0.6s ease-out forwards;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* 卡片淡入动画 */
+  .animated-fade-in {
+    opacity: 0;
+    animation: fade-in 0.5s ease-out forwards;
+    will-change: opacity;
+  }
+
+  /* 卡片淡入缩放动画 */
+  .animated-fade-in-scale {
+    opacity: 0;
+    animation: fade-in-scale 0.5s ease-out forwards;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  @keyframes fade-in-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* 骨架屏脉冲动画 */
+  .skeleton-pulse {
+    animation: pulse-glass 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-glass {
+    0%, 100% {
+      opacity: 0.6;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    50% {
+      opacity: 0.8;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  /* 尊重用户的动画偏好设置 */
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition,
+    .animated-fade-in-up,
+    .animated-fade-in,
+    .animated-fade-in-scale,
+    .animate-fade-in,
+    .animate-fade-in-up {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .skeleton-pulse {
+      animation: none;
+    }
+  }
+}

@@ -1,0 +1,150 @@
+/**
+ * 玻璃拟态（Glassmorphism）设计系统样式
+ *
+ * 实现玻璃拟态效果的核心样式类
+ * 特点：半透明、背景模糊、柔和边框
+ */
+
+/* 玻璃卡片基础样式 */
+.glass-card {
+  /* 半透明背景 */
+  background: rgba(255, 255, 255, 0.05);
+
+  /* 背景模糊（毛玻璃效果） */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  /* 柔和边框 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* 阴影效果 */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* 圆角 */
+  border-radius: 1rem;
+
+  /* 内边距 */
+  padding: 1.5rem;
+
+  /* 平滑过渡 */
+  transition: all 0.3s ease;
+}
+
+/* 玻璃卡片悬停效果 */
+.glass-card-hover {
+  cursor: pointer;
+}
+
+.glass-card-hover:hover {
+  /* 悬停时背景稍深 */
+  background: rgba(255, 255, 255, 0.1);
+
+  /* 悬停时边框更明显 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  /* 悬停时阴影加深 */
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+
+  /* 悬停时轻微放大 */
+  transform: scale(1.02);
+}
+
+/* 玻璃卡片变体 */
+.glass-card-featured {
+  /* 特色卡片：背景稍深 */
+  background: rgba(255, 255, 255, 0.1);
+
+  /* 边框更明显 */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glass-card-subtle {
+  /* 微妙卡片：背景更浅 */
+  background: rgba(255, 255, 255, 0.025);
+
+  /* 边框更淡 */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 玻璃导航栏 */
+.glass-nav {
+  background: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 玻璃模态框 */
+.glass-modal {
+  background: rgba(18, 18, 26, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* 玻璃输入框 */
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(99, 102, 241, 0.5);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* 玻璃按钮 */
+.glass-btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.glass-btn:active {
+  transform: translateY(0);
+}
+
+/* 光晕效果 */
+.glass-glow {
+  position: relative;
+}
+
+.glass-glow::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #6366f1, #a855f7, #6366f1);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  filter: blur(8px);
+}
+
+.glass-glow:hover::before {
+  opacity: 0.6;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .glass-card {
+    padding: 1rem;
+  }
+}
