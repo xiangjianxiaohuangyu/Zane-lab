@@ -55,6 +55,9 @@ export interface WritingFrontmatter {
 
   /** 预计阅读时长（分钟，可选） */
   readTime?: number;
+
+  /** 是否显示左侧目录导航（默认 false） */
+  showToc?: boolean;
 }
 
 /**

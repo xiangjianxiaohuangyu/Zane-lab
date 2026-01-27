@@ -7,13 +7,17 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getWritingBySlug, getContent } from '../lib/content';
+import { formatDate } from '../lib/date';
+import { extractToc } from '../lib/toc';
 import { MarkdownRenderer } from '../components/ui/MarkdownRenderer';
 import { BackButton } from '../components/ui/BackButton';
 import { Badge } from '../components/ui/Badge';
 import { GlassCard } from '../components/ui/GlassCard';
+import { TableOfContents } from '../components/ui/TableOfContents';
 import type { Content } from '../lib/types';
 import type { WritingFrontmatter } from '../lib/types';
 import { WRITING_CATEGORY_MAP } from '../lib/types';
+import type { TocItem } from '../lib/toc';
 
 /**
  * WritingDetail 页面组件
@@ -22,6 +26,7 @@ export function WritingDetail() {
   const { category, slug } = useParams<{ category: string; slug: string }>();
   const [writing, setWriting] = useState<Content<WritingFrontmatter> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [toc, setToc] = useState<TocItem[]>([]);
 
   useEffect(() => {
     getContent().then(() => {
@@ -30,6 +35,9 @@ export function WritingDetail() {
         // 验证分类是否匹配
         if (data && data.frontmatter.category === category) {
           setWriting(data);
+          // 提取目录
+          const tocItems = extractToc(data.content);
+          setToc(tocItems);
         } else {
           setWriting(null);
         }
@@ -61,6 +69,7 @@ export function WritingDetail() {
 
   const { frontmatter, content } = writing;
   const categoryName = WRITING_CATEGORY_MAP[frontmatter.category] || frontmatter.category;
+  const showToc = frontmatter.showToc && toc.length > 0;
 
   return (
     <div className="py-48">
@@ -69,9 +78,12 @@ export function WritingDetail() {
         <BackButton to="/writing" />
       </div>
 
+      {/* 左侧目录（仅在 showToc 为 true 时显示） */}
+      {showToc && <TableOfContents toc={toc} />}
+
       {/* 文章头部信息 */}
       <div className="mb-6">
-        <GlassCard className="!pt-6 !px-10 !pb-8">
+        <GlassCard className="!pt-4 !px-10 !pb-8">
           {/* 分类标签 */}
           <div className="mb-4">
             <span className="inline-block px-4 py-2 rounded-full text-sm font-medium text-primary bg-glass-100">
@@ -109,11 +121,7 @@ export function WritingDetail() {
                 />
               </svg>
               <span className="text-text-secondary text-sm">
-                {new Date(frontmatter.date).toLocaleDateString('zh-CN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDate(frontmatter.date)}
               </span>
             </div>
 

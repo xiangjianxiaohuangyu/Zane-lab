@@ -4,6 +4,7 @@ import { Badge } from '../ui/Badge';
 import type { Content } from '@/lib/types';
 import type { WritingFrontmatter } from '@/lib/types';
 import { WRITING_CATEGORY_MAP } from '@/lib/types';
+import { formatDate } from '@/lib/date';
 
 /**
  * WritingCard 组件属性
@@ -68,13 +69,7 @@ export function WritingCard({ writing }: WritingCardProps) {
           )}
 
           {/* 日期 */}
-          <span>
-            {new Date(frontmatter.date).toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </span>
+          <span>{formatDate(frontmatter.date)}</span>
         </div>
       </GlassCard>
     </Link>

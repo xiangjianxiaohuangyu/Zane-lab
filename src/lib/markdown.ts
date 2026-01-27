@@ -2,6 +2,7 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import remarkHtml from 'remark-html';
 import remarkGfm from 'remark-gfm';
+import remarkSlug from 'remark-slug';
 
 /**
  * 解析 Markdown 文件
@@ -35,6 +36,7 @@ export async function parseMarkdown(file: string): Promise<{
   // 使用 remark 将 markdown 转换为 HTML
   const processedContent = await remark()
     .use(remarkGfm) // 支持 GitHub Flavored Markdown (GFM)
+    .use(remarkSlug) // 为标题添加 ID 属性
     .use(remarkHtml, { sanitize: false }) // 转换为 HTML，不进行sanitize（允许HTML）
     .process(content);
 

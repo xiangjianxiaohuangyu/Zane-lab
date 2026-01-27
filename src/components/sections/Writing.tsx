@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { WritingCard } from '../cards/WritingCard';
 import { AnimatedWrapper } from '../ui/AnimatedWrapper';
 import { CardSkeleton } from '../ui/Skeleton';
@@ -61,14 +62,32 @@ export function Writing() {
             return (
               <div key={category}>
                 {/* 分类标题 */}
-                <h3 className="text-2xl font-semibold text-text-primary mb-6">
-                  {categoryLabel}
-                </h3>
+                <div className="mb-6">
+                  {/* 标题和查看所有链接 */}
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-2xl font-semibold text-text-primary">
+                      {categoryLabel}
+                      <span className="text-text-secondary text-lg ml-2">({categoryWritings.length})</span>
+                    </h3>
+                    <Link
+                      to={`/writing/${category}`}
+                      className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-all duration-200 group"
+                    >
+                      <span>查看所有</span>
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+
+                  {/* 分隔线 */}
+                  <div className="border-b border-glass-200 mb-6"></div>
+                </div>
 
                 {/* 该分类下的写作列表 */}
                 {categoryWritings.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {categoryWritings.map((writing, index) => (
+                    {categoryWritings.slice(0, 3).map((writing, index) => (
                       <AnimatedWrapper
                         key={writing.slug}
                         delay={index * 100}
