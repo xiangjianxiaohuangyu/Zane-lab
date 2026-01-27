@@ -54,8 +54,9 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
         prose-h5:text-base
         prose-h6:text-sm
         /* 段落样式 */
-        prose-p:mb-4
-        prose-p:leading-relaxed
+        prose-p:mb-6
+        prose-p:leading-loose
+        prose-p:text-lg
         prose-p:text-text-secondary
         prose-p:indent-8
         /* 列表样式 */

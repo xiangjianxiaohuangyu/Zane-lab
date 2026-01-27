@@ -12,6 +12,7 @@ import { Home } from './pages/Home';
 import { Projects } from './pages/Projects';
 import { ProjectDetail } from './pages/ProjectDetail';
 import { Writing } from './pages/Writing';
+import { WritingDetail } from './pages/WritingDetail';
 import { Records } from './pages/Records';
 
 /**
@@ -39,6 +40,7 @@ function AppContent() {
 
               {/* 写作路由 */}
               <Route path="/writing" element={<Writing />} />
+              <Route path="/writing/:category/:slug" element={<WritingDetail />} />
 
               {/* 记录路由 */}
               <Route path="/records" element={<Records />} />

@@ -33,19 +33,19 @@ export function WritingCard({ writing }: WritingCardProps) {
       to={`/writing/${frontmatter.category}/${slug}`}
       className="block h-full"
     >
-      <GlassCard hover className="h-full flex flex-col">
+      <GlassCard hover className="!pt-8 !px-8 !pb-4 h-full flex flex-col">
         {/* 分类标签 */}
         <div className="mb-3">
           <Badge variant="primary">{categoryLabel}</Badge>
         </div>
 
         {/* 标题 */}
-        <h3 className="text-xl font-semibold text-text-primary mb-2">
+        <h3 className="text-xl font-semibold text-text-primary mb-3">
           {frontmatter.title}
         </h3>
 
         {/* 描述 */}
-        <p className="text-text-secondary mb-4 flex-grow">
+        <p className="text-text-secondary mb-4 flex-grow line-clamp-none">
           {frontmatter.description}
         </p>
 
