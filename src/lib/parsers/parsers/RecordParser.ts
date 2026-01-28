@@ -6,7 +6,7 @@
 
 import { BaseParser } from '../base/BaseParser';
 import type { RecordFrontmatter } from '../../types';
-import type { ValidationResult, ValidationError, ValidationWarning } from '../base/ParserInterface';
+import type { ValidationResult, ValidationError, ValidationWarning, ParseResult } from '../base/ParserInterface';
 
 /**
  * Record 解析器
@@ -135,5 +135,92 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
       ...data,
       ...defaults,
     };
+  }
+
+  /**
+   * 解析包含多个记录的文件
+   *
+   * 用于解析单个文件中包含多个连续 frontmatter 块的格式
+   * 每个块使用 `---` 分隔符分隔
+   *
+   * @param file - 包含多个 frontmatter 块的文件内容
+   * @param category - 记录分类（movie/book/game/music）
+   * @returns 解析后的记录数组
+   */
+  async parseMultiRecords(
+    file: string,
+    category: string
+  ): Promise<ParseResult<RecordFrontmatter>[]> {
+    // 统一换行符为 Unix 格式 (\n)
+    let content = file.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // 移除文件开头和结尾的空白
+    content = content.trim();
+
+    // 移除开头的 ---（如果有）
+    if (content.startsWith('---')) {
+      content = content.substring(3).trim();
+    }
+
+    // 按 \n---\n 分割文件内容
+    const rawBlocks = content.split(/\n---\n/);
+
+    // 清理每个块：移除开头的 --- 和空白
+    const blocks = rawBlocks
+      .map((block) => {
+        // 移除块开头的 ---（如果有）
+        let cleaned = block.trim();
+        if (cleaned.startsWith('---')) {
+          cleaned = cleaned.substring(3).trim();
+        }
+        return cleaned;
+      })
+      .filter((block) => block.trim());
+
+    // 调试日志
+    console.log(`[RecordParser] Parsing ${category} file, found ${blocks.length} blocks`);
+
+    // 为每个块添加开头的 ---，使其成为有效的 frontmatter 格式
+    const results = await Promise.all(
+      blocks.map(async (block, index) => {
+        // 生成唯一 slug：分类 + 内容哈希
+        const slug = this.generateSlug(block, category, index);
+        // 添加开头的 ---
+        const formattedBlock = `---\n${block}`;
+        const result = await this.parse(formattedBlock, slug);
+        console.log(`[RecordParser] Parsed block ${index}:`, result.frontmatter.title);
+        return result;
+      })
+    );
+
+    console.log(`[RecordParser] Total parsed records for ${category}:`, results.length);
+    return results;
+  }
+
+  /**
+   * 为记录生成唯一的 slug
+   *
+   * 使用内容的简单哈希算法生成唯一标识符
+   *
+   * @param content - 记录内容
+   * @param category - 记录分类
+   * @param index - 记录在文件中的索引
+   * @returns 唯一的 slug
+   */
+  private generateSlug(content: string, category: string, index: number): string {
+    // 简单哈希算法
+    let hash = 0;
+    const str = content + index;
+
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+
+    // 转为正数并取十六进制
+    const hexHash = Math.abs(hash).toString(16).padStart(8, '0');
+
+    return `${category}-${hexHash}`;
   }
 }

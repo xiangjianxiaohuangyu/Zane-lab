@@ -15,6 +15,7 @@ import { Writing } from './pages/Writing';
 import { WritingCategory } from './pages/WritingCategory';
 import { WritingDetail } from './pages/WritingDetail';
 import { Records } from './pages/Records';
+import { RecordCategory } from './pages/content/RecordCategory';
 
 /**
  * App 内部组件（使用 useLocation）
@@ -46,6 +47,7 @@ function AppContent() {
 
               {/* 记录路由 */}
               <Route path="/records" element={<Records />} />
+              <Route path="/records/:category" element={<RecordCategory />} />
 
               {/* TODO: 后续添加详情页路由 */}
               {/* <Route path="/writing/:category/:slug" element={<WritingDetail />} /> */}

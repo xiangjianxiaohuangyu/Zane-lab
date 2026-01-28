@@ -139,46 +139,67 @@ async function loadWriting(): Promise<Content<WritingFrontmatter>[]> {
 /**
  * 加载所有记录内容
  *
- * 从 content/records/ 目录及其子目录加载所有 .md 文件
+ * 从 content/records/ 目录加载 4 个分类文件（movies, books, games, music）
+ * 每个文件包含多个记录，使用连续的 frontmatter 格式
  * 按日期降序排列（最新的在前）
  *
  * @returns 记录内容数组
  */
 async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
-  // 递归加载所有记录文件（包括子目录）
-  const recordModules = import.meta.glob('../../content/records/**/*.md', {
+  // 加载 4 个分类文件
+  const recordModules = import.meta.glob('../../content/records/*.md', {
     query: '?raw',
     import: 'default',
   });
 
   // 创建记录解析器
   const recordParser = new RecordParser();
+  const allRecords: Content<RecordFrontmatter>[] = [];
 
-  // 解析所有记录文件
-  const records = await Promise.all(
-    Object.entries(recordModules).map(async ([path, loader]) => {
-      try {
-        const file = await (loader as () => Promise<string>)() as string;
-        const slug = extractSlug(path);
+  // 定义分类映射（从文件名提取分类）
+  const categoryMap: Record<string, 'movie' | 'book' | 'game' | 'music'> = {
+    '../../content/records/movies.md': 'movie',
+    '../../content/records/books.md': 'book',
+    '../../content/records/games.md': 'game',
+    '../../content/records/music.md': 'music',
+  };
 
-        // 使用新的记录解析器
-        const parsed = await recordParser.parse(file, slug);
+  // 解析每个分类文件
+  for (const [path, loader] of Object.entries(recordModules)) {
+    try {
+      const file = await (loader as () => Promise<string>)();
+      const category = categoryMap[path];
 
-        return {
-          frontmatter: parsed.frontmatter,
-          content: parsed.content,
-          slug,
-          metadata: parsed.metadata,
-        } as Content<RecordFrontmatter>;
-      } catch (error) {
-        console.error(`Error parsing record ${path}:`, error);
-        throw error;
+      if (!category) {
+        console.warn(`Unknown record file: ${path}, skipping...`);
+        continue;
       }
-    })
-  );
+
+      console.log(`[Content] Loading ${category} from ${path}`);
+
+      // 使用多记录解析方法
+      const parsedRecords = await recordParser.parseMultiRecords(file, category);
+
+      // 转换为 Content 格式
+      const contents = parsedRecords.map((parsed) => ({
+        frontmatter: parsed.frontmatter,
+        content: parsed.content,
+        slug: parsed.slug || `${category}-${Date.now()}`,
+        metadata: parsed.metadata,
+      })) as Content<RecordFrontmatter>[];
+
+      console.log(`[Content] Loaded ${contents.length} records for ${category}`);
+      allRecords.push(...contents);
+    } catch (error) {
+      console.error(`Error parsing record file ${path}:`, error);
+      // 继续处理其他文件
+    }
+  }
+
+  console.log(`[Content] Total records loaded:`, allRecords.length);
 
   // 按日期降序排列
-  return records.sort(
+  return allRecords.sort(
     (a, b) =>
       new Date(b.frontmatter.date).getTime() -
       new Date(a.frontmatter.date).getTime()

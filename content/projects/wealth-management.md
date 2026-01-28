@@ -5,7 +5,7 @@ description: |
   · 用于追踪资产、规划投资、分析财富增长
   · 采用本地存储的隐私保护设计
 date: "2025-01-22"
-tags: ["Electron", "React", "TypeScript", "Vite", "ECharts"]
+tags: ["桌面应用","Electron", "React",  "Vite", "ECharts"]
 link: "https://github.com/xiangjianxiaohuangyu/wealth-management"
 status: "持续更新"
 statusColor: "white"

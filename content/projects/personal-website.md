@@ -5,7 +5,7 @@ description: |
   · 用于思考、记录与构建
   · 采用内容即文件的架构设计
 date: "2025-01-27"
-tags: ["React", "TypeScript", "Vite", "Tailwind CSS"]
+tags: ["个人网站","React",  "Vite", "Tailwind CSS"]
 link: "https://github.com/xiangjianxiaohuangyu/Zane-lab"
 status: "进行中"
 statusColor: "blue"

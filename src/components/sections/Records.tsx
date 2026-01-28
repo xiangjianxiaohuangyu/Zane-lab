@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { RecordCard } from '../cards/RecordCard';
 import { AnimatedWrapper } from '../ui/AnimatedWrapper';
 import { CardSkeleton } from '../ui/Skeleton';
@@ -36,19 +37,40 @@ export function Records() {
       {/* 加载状态 */}
       {loading ? (
         <div className="space-y-12">
-          {categories.map((category) => (
-            <div key={category}>
-              <h3 className="text-2xl font-semibold text-text-primary mb-6">
-                {RECORD_CATEGORY_MAP[category]}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
+          {categories.map((category) => {
+            const categoryLabel = RECORD_CATEGORY_MAP[category];
+            return (
+              <div key={category}>
+                {/* 分类标题 */}
+                <div className="mb-6">
+                  {/* 标题和查看所有链接 */}
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-2xl font-semibold text-text-primary">
+                      {categoryLabel}
+                    </h3>
+                    <Link
+                      to={`/records/${category}`}
+                      className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-all duration-200 group"
+                    >
+                      <span>查看所有</span>
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+
+                  {/* 分隔线 */}
+                  <div className="border-b border-glass-200 mb-6"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <CardSkeleton />
+                  <CardSkeleton />
+                  <CardSkeleton />
+                  <CardSkeleton />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         // 分类网格
@@ -62,14 +84,32 @@ export function Records() {
             return (
               <div key={category}>
                 {/* 分类标题 */}
-                <h3 className="text-2xl font-semibold text-text-primary mb-6">
-                  {categoryLabel}
-                </h3>
+                <div className="mb-6">
+                  {/* 标题和查看所有链接 */}
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-2xl font-semibold text-text-primary">
+                      {categoryLabel}
+                      <span className="text-text-secondary text-lg ml-2">({categoryRecords.length})</span>
+                    </h3>
+                    <Link
+                      to={`/records/${category}`}
+                      className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-all duration-200 group"
+                    >
+                      <span>查看所有</span>
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
+
+                  {/* 分隔线 */}
+                  <div className="border-b border-glass-200 mb-6"></div>
+                </div>
 
                 {/* 该分类下的记录列表 */}
                 {categoryRecords.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {categoryRecords.map((record, index) => (
+                    {categoryRecords.slice(0, 4).map((record, index) => (
                       <AnimatedWrapper
                         key={record.slug}
                         delay={index * 100}

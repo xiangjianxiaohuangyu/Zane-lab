@@ -48,7 +48,7 @@ export function GlassCard({
   const baseClasses = `
     glass-card
     rounded-2xl
-    p-16
+    p-4
     shadow-xl
     transition-all
     duration-300
