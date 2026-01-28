@@ -6,7 +6,7 @@ description: |
   · 俯视角 2D Roguelike 游戏
 date: "2025-02-01"
 tags: ["游戏","Godot Engine", "Tile-based"]
-link: "https://github.com/xiangjianxiaohuangyu/element-loop"
+
 status: "即将推出"
 statusColor: "green"
 version: "v0.0.0"

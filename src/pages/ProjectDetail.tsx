@@ -79,13 +79,19 @@ export function ProjectDetail() {
 
           {/* 元数据 */}
           <div className="flex flex-wrap items-center gap-4 mb-4">
-            {/* 状态 */}
-            <div className="flex items-center gap-2">
-              <span className="text-text-secondary text-sm">状态:</span>
-              <span className={`text-sm font-medium ${statusInfo.color}`}>
-                {statusInfo.label}
-              </span>
-            </div>
+            {/* 状态药丸 */}
+            <span className={`inline-flex items-center !px-3 !py-1 rounded-full text-sm font-medium glass-card !p-0 border ${
+              frontmatter.statusColor
+                ? {
+                    red: 'bg-red-500/10 text-red-200 border-red-500/20 backdrop-blur-sm',
+                    white: 'bg-white/10 text-white border-white/20 backdrop-blur-sm',
+                    green: 'bg-green-500/10 text-green-200 border-green-500/20 backdrop-blur-sm',
+                    blue: 'bg-blue-500/10 text-blue-200 border-blue-500/20 backdrop-blur-sm',
+                  }[frontmatter.statusColor]
+                : 'bg-glass-200 text-text-secondary border-glass-300'
+            }`}>
+              {statusInfo.label}
+            </span>
 
             {/* 日期 */}
             <div className="flex items-center gap-2">
