@@ -26,6 +26,8 @@ interface WritingCardProps {
  */
 export function WritingCard({ writing }: WritingCardProps) {
   const { frontmatter, slug } = writing;
+  const isPoetry = frontmatter.category === 'poetry';
+  const isAnnual = frontmatter.category === 'annual';
 
   return (
     <Link
@@ -33,8 +35,17 @@ export function WritingCard({ writing }: WritingCardProps) {
       className="block h-full"
     >
       <GlassCard hover className="!pt-8 !px-8 !pb-4 h-full flex flex-col">
-        {/* 标签 */}
-        {frontmatter.tags && frontmatter.tags.length > 0 && (
+        {/* 年终总结：显示年份 */}
+        {isAnnual && frontmatter.years && (
+          <div className="mb-3">
+            <Badge variant={frontmatter.statusColor || 'primary'}>
+              {frontmatter.years}
+            </Badge>
+          </div>
+        )}
+
+        {/* 其他分类：显示标签 */}
+        {!isAnnual && frontmatter.tags && frontmatter.tags.length > 0 && (
           <div className="mb-3 flex gap-2 flex-wrap">
             {frontmatter.tags.map((tag) => (
               <Badge
@@ -57,10 +68,24 @@ export function WritingCard({ writing }: WritingCardProps) {
           {frontmatter.description}
         </p>
 
+        {/* 年终总结：在描述下方显示标签 */}
+        {isAnnual && frontmatter.tags && frontmatter.tags.length > 0 && (
+          <div className="mb-4 flex gap-2 flex-wrap">
+            {frontmatter.tags.map((tag) => (
+              <Badge
+                key={tag}
+                variant="default"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+
         {/* 底部信息：阅读时间和日期 */}
         <div className="flex items-center justify-between text-sm text-text-secondary pt-4 border-t border-glass-200">
-          {/* 阅读时间 */}
-          {frontmatter.readTime && (
+          {/* 阅读时间（诗歌不显示） */}
+          {frontmatter.readTime && !isPoetry && (
             <span>📖 {frontmatter.readTime} 分钟</span>
           )}
 

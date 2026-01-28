@@ -3,6 +3,8 @@
  *
  * 使用 Vite 的 import.meta.glob() 在构建时加载所有 Markdown 文件
  * 这是整个项目的核心，实现了"内容即文件"的架构原则
+ *
+ * 重构说明：现在使用专门的解析器来处理不同类型的内容
  */
 
 import type {
@@ -11,7 +13,10 @@ import type {
   RecordFrontmatter,
   Content,
 } from './types';
-import { parseMarkdown, extractSlug } from './markdown';
+import { extractSlug } from './markdown';
+import { ProjectParser } from './parsers';
+import { WritingParser } from './parsers';
+import { RecordParser } from './parsers';
 
 /**
  * 加载所有项目内容
@@ -25,7 +30,7 @@ async function loadProjects(): Promise<Content<ProjectFrontmatter>[]> {
   // 使用 Vite 的 glob import 导入所有项目文件
   // ?raw 表示导入原始字符串内容
   // 路径相对于当前文件：src/lib/content.ts -> content/projects/
-  const projectModules = import.meta.glob('/content/projects/*.md', {
+  const projectModules = import.meta.glob('../../content/projects/*.md', {
     query: '?raw',
     import: 'default',
   });
@@ -38,22 +43,32 @@ async function loadProjects(): Promise<Content<ProjectFrontmatter>[]> {
     return [];
   }
 
+  // 创建项目解析器
+  const projectParser = new ProjectParser();
+
   // 解析所有项目文件
   const projects = await Promise.all(
     Object.entries(projectModules).map(async ([path, loader]) => {
-      // 加载文件内容（添加类型断言）
-      const file = await (loader as () => Promise<string>)();
+      try {
+        // 加载文件内容
+        const file = await (loader as () => Promise<string>)();
 
-      // 从文件路径提取 slug
-      const slug = extractSlug(path);
+        // 从文件路径提取 slug
+        const slug = extractSlug(path);
 
-      // 解析 Markdown
-      const parsed = await parseMarkdown(file);
+        // 使用新的解析器解析
+        const parsed = await projectParser.parse(file, slug);
 
-      return {
-        ...parsed,
-        slug,
-      } as Content<ProjectFrontmatter>;
+        return {
+          frontmatter: parsed.frontmatter,
+          content: parsed.content,
+          slug,
+          metadata: parsed.metadata,
+        } as Content<ProjectFrontmatter>;
+      } catch (error) {
+        console.error(`Error parsing project ${path}:`, error);
+        throw error;
+      }
     })
   );
 
@@ -75,6 +90,7 @@ async function loadProjects(): Promise<Content<ProjectFrontmatter>[]> {
  * - essays/ -> essay (随笔)
  * - fiction/ -> fiction (小说)
  * - annual/ -> annual (年度总结)
+ * - poetry/ -> poetry (诗歌)
  * 按日期降序排列（最新的在前）
  *
  * @returns 写作内容数组
@@ -86,36 +102,29 @@ async function loadWriting(): Promise<Content<WritingFrontmatter>[]> {
     import: 'default',
   });
 
+  // 创建写作解析器
+  const writingParser = new WritingParser();
+
   // 解析所有写作文件
   const writings = await Promise.all(
     Object.entries(writingModules).map(async ([path, loader]) => {
-      const file = await (loader as () => Promise<string>)() as string;
-      const slug = extractSlug(path);
-      const parsed = await parseMarkdown(file);
+      try {
+        const file = await (loader as () => Promise<string>)() as string;
+        const slug = extractSlug(path);
 
-      // 根据文件夹路径自动分配分类
-      let category: 'essay' | 'annual' | 'fiction' = 'essay'; // 默认为随笔
+        // 使用新的写作解析器（会自动检测 category）
+        const parsed = await writingParser.parse(file, slug, path);
 
-      if (path.includes('/fiction/')) {
-        category = 'fiction';
-      } else if (path.includes('/annual/')) {
-        category = 'annual';
-      } else if (path.includes('/essays/')) {
-        category = 'essay';
+        return {
+          frontmatter: parsed.frontmatter,
+          content: parsed.content,
+          slug,
+          metadata: parsed.metadata,
+        } as Content<WritingFrontmatter>;
+      } catch (error) {
+        console.error(`Error parsing writing ${path}:`, error);
+        throw error;
       }
-
-      // 如果 frontmatter 中没有指定 category，使用自动分配的
-      // 如果已经指定，则保持原值（向后兼容）
-      const finalCategory = parsed.frontmatter.category || category;
-
-      return {
-        ...parsed,
-        frontmatter: {
-          ...parsed.frontmatter,
-          category: finalCategory,
-        },
-        slug,
-      } as Content<WritingFrontmatter>;
     })
   );
 
@@ -142,17 +151,29 @@ async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
     import: 'default',
   });
 
+  // 创建记录解析器
+  const recordParser = new RecordParser();
+
   // 解析所有记录文件
   const records = await Promise.all(
     Object.entries(recordModules).map(async ([path, loader]) => {
-      const file = await (loader as () => Promise<string>)() as string;
-      const slug = extractSlug(path);
-      const parsed = await parseMarkdown(file);
+      try {
+        const file = await (loader as () => Promise<string>)() as string;
+        const slug = extractSlug(path);
 
-      return {
-        ...parsed,
-        slug,
-      } as Content<RecordFrontmatter>;
+        // 使用新的记录解析器
+        const parsed = await recordParser.parse(file, slug);
+
+        return {
+          frontmatter: parsed.frontmatter,
+          content: parsed.content,
+          slug,
+          metadata: parsed.metadata,
+        } as Content<RecordFrontmatter>;
+      } catch (error) {
+        console.error(`Error parsing record ${path}:`, error);
+        throw error;
+      }
     })
   );
 
@@ -243,11 +264,11 @@ if (typeof window !== 'undefined') {
 /**
  * 根据分类筛选写作内容
  *
- * @param category - 写作分类 (essay | annual | fiction)
+ * @param category - 写作分类 (essay | annual | fiction | poetry)
  * @returns 该分类下的所有写作内容
  */
 export function getWritingByCategory(
-  category: 'essay' | 'annual' | 'fiction'
+  category: 'essay' | 'annual' | 'fiction' | 'poetry'
 ): Content<WritingFrontmatter>[] {
   return content.writing.filter((w) => w.frontmatter.category === category);
 }

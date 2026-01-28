@@ -40,7 +40,7 @@ export function Badge({
     danger: 'bg-red-500/20 text-red-400 border-red-500/30',
     blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
     green: 'bg-green-500/20 text-green-400 border-green-500/30',
-    white: 'bg-white/80 text-text-primary border-white/90',
+    white: 'bg-glass-200/60 text-text-primary border-glass-300 backdrop-blur-md',
     pink: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
   };
 

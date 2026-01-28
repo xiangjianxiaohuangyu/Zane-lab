@@ -1,10 +1,11 @@
 ---
-title: "测试"
-description: "既不是假期，也没有凡事，坐在只是我单纯想要回家的高铁上时......"
-date: "2023-01"
+title: "焦虑与自由"
+description: "如此渺小的我，要如何去拥抱这个世界......"
+date: "2022-12-31"
 category: "annual"
-tags: ["年终总结"]
-showToc: true
+years: "2022年"
+tags: ["年终总结", "回顾"]
+statusColor: "green"
 ---
 
 

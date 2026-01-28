@@ -31,8 +31,7 @@ export function WritingDetail() {
     getContent().then(() => {
       if (slug) {
         const data = getWritingBySlug(slug);
-        // 验证分类是否匹配
-        if (data && data.frontmatter.category === category) {
+        if (data) {
           setWriting(data);
           // 提取目录
           const tocItems = extractToc(data.content);
@@ -72,6 +71,7 @@ export function WritingDetail() {
   // 判断是否为诗集（poetry），使用居中样式
   const isPoetry = frontmatter.category === 'poetry';
   const markdownStyle = isPoetry ? 'poetry' : 'writing';
+  const titleClass = 'text-5xl font-bold text-text-primary mb-4'; // 移除诗歌标题居中
 
   return (
     <div className="py-48">
@@ -101,7 +101,7 @@ export function WritingDetail() {
           )}
 
           {/* 文章标题 */}
-          <h1 className="text-5xl font-bold text-text-primary mb-4">
+          <h1 className={titleClass}>
             {frontmatter.title}
           </h1>
 
@@ -134,8 +134,8 @@ export function WritingDetail() {
               </span>
             </div>
 
-            {/* 阅读时长 */}
-            {frontmatter.readTime && (
+            {/* 阅读时长（诗歌不显示） */}
+            {frontmatter.readTime && !isPoetry && (
               <div className="flex items-center gap-2">
                 <svg
                   className="w-5 h-5 text-text-secondary"

@@ -1,3 +1,5 @@
+import type { TocItem } from './toc';
+
 /**
  * 项目 Frontmatter 类型定义
  *
@@ -35,7 +37,7 @@ export interface ProjectFrontmatter {
 /**
  * 写作 Frontmatter 类型定义
  *
- * 用于写作内容（随笔、年终总结、小说）的元数据
+ * 用于写作内容（随笔、年终总结、小说、诗歌）的元数据
  */
 export interface WritingFrontmatter {
   /** 文章标题 */
@@ -48,10 +50,13 @@ export interface WritingFrontmatter {
   date: string;
 
   /** 写作分类 */
-  category: 'essay' | 'annual' | 'fiction';
+  category: 'essay' | 'annual' | 'fiction' | 'poetry';
 
   /** 标签列表 */
-  tags: string[];
+  tags?: string[];
+
+  /** 年终总结年份（仅 annual 类型使用） */
+  years?: string;
 
   /** 预计阅读时长（分钟，可选） */
   readTime?: number;
@@ -117,6 +122,34 @@ export interface Content<T> {
 
   /** 内容的唯一标识符（从文件名派生） */
   slug: string;
+
+  /** 自动提取的元数据（可选） */
+  metadata?: ContentMetadata;
+}
+
+/**
+ * 内容元数据接口
+ *
+ * 包含自动提取的元数据信息
+ */
+export interface ContentMetadata {
+  /** 字数统计（中英文混合） */
+  wordCount?: number;
+
+  /** 阅读时间（分钟） */
+  readTime?: number;
+
+  /** 目录结构 */
+  toc?: TocItem[];
+
+  /** 诗歌行数（poetry 专属） */
+  lineCount?: number;
+
+  /** 诗节数（poetry 专属） */
+  stanzaCount?: number;
+
+  /** 扩展字段（允许特定类型添加额外元数据） */
+  [key: string]: any;
 }
 
 /**
@@ -127,6 +160,7 @@ export const WRITING_CATEGORY_MAP: Record<string, string> = {
   essay: '随笔',
   annual: '年终总结',
   fiction: '小说',
+  poetry: '诗歌',
 };
 
 /**

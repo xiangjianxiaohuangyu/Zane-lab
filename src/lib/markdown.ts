@@ -7,23 +7,21 @@ import remarkSlug from 'remark-slug';
 /**
  * 解析 Markdown 文件
  *
- * @param file - Markdown 文件的原始内容（字符串）
- * @returns 包含 frontmatter 和 HTML 内容的对象
+ * @deprecated 请使用专门的解析器代替
+ * 此函数保留仅用于向后兼容，新代码应使用：
+ * - ProjectParser (用于项目)
+ * - WritingParser (用于写作)
+ * - RecordParser (用于记录)
  *
  * @example
  * ```typescript
- * const markdownContent = `
- * ---
- * title: "Hello"
- * date: "2025-01-27"
- * ---
+ * // 旧用法（不推荐）
+ * const result = await parseMarkdown(file);
  *
- * # Hello World
- * `;
- *
- * const result = await parseMarkdown(markdownContent);
- * console.log(result.frontmatter); // { title: "Hello", date: "2025-01-27" }
- * console.log(result.content); // "<h1>Hello World</h1>"
+ * // 新用法（推荐）
+ * import { ProjectParser } from './parsers';
+ * const parser = new ProjectParser();
+ * const result = await parser.parse(file, 'my-project');
  * ```
  */
 export async function parseMarkdown(file: string): Promise<{
@@ -35,8 +33,8 @@ export async function parseMarkdown(file: string): Promise<{
 
   // 使用 remark 将 markdown 转换为 HTML
   const processedContent = await remark()
-    .use(remarkGfm) // 支持 GitHub Flavored Markdown (GFM)
-    .use(remarkSlug) // 为标题添加 ID 属性
+    .use(remarkGfm as any) // 支持 GitHub Flavored Markdown (GFM)
+    .use(remarkSlug as any) // 为标题添加 ID 属性
     .use(remarkHtml, { sanitize: false }) // 转换为 HTML，不进行sanitize（允许HTML）
     .process(content);
 

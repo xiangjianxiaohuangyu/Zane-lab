@@ -54,8 +54,11 @@ export function Writing() {
         // 分类网格
         <div className="space-y-12">
           {categories.map((category) => {
-            const categoryWritings = writings.filter(
-              (w) => w.frontmatter.category === category
+            // essay 分类包含 essay 和 poetry
+            const categoryWritings = writings.filter((w) =>
+              category === 'essay'
+                ? (w.frontmatter.category === 'essay' || w.frontmatter.category === 'poetry')
+                : w.frontmatter.category === category
             );
             const categoryLabel = WRITING_CATEGORY_MAP[category];
 

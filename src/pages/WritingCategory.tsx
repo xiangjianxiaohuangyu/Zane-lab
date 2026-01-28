@@ -26,8 +26,11 @@ export function WritingCategory() {
   useEffect(() => {
     getContent().then((data) => {
       if (category) {
-        const categoryWritings = data.writing.filter(
-          (w) => w.frontmatter.category === category
+        // essay 分类包含 essay 和 poetry
+        const categoryWritings = data.writing.filter((w) =>
+          category === 'essay'
+            ? (w.frontmatter.category === 'essay' || w.frontmatter.category === 'poetry')
+            : w.frontmatter.category === category
         );
         setWritings(categoryWritings);
       }

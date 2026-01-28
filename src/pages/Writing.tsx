@@ -24,7 +24,7 @@ export function Writing() {
           写作
         </h1>
         <p className="text-text-secondary text-lg">
-          随笔、年终总结与小说创作
+          随笔、年终总结、小说创作
         </p>
       </div>
 
