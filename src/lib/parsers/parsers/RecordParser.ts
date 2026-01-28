@@ -177,9 +177,6 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
       })
       .filter((block) => block.trim());
 
-    // 调试日志
-    console.log(`[RecordParser] Parsing ${category} file, found ${blocks.length} blocks`);
-
     // 为每个块添加开头的 ---，使其成为有效的 frontmatter 格式
     const results = await Promise.all(
       blocks.map(async (block, index) => {
@@ -188,12 +185,10 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
         // 添加开头的 ---
         const formattedBlock = `---\n${block}`;
         const result = await this.parse(formattedBlock, slug);
-        console.log(`[RecordParser] Parsed block ${index}:`, result.frontmatter.title);
         return result;
       })
     );
 
-    console.log(`[RecordParser] Total parsed records for ${category}:`, results.length);
     return results;
   }
 

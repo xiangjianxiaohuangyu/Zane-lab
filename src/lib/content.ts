@@ -37,11 +37,7 @@ async function loadProjects(): Promise<Content<ProjectFrontmatter>[]> {
     import: 'default',
   });
 
-  console.log('Found project modules:', Object.keys(projectModules));
-  console.log('Number of modules:', Object.keys(projectModules).length);
-
   if (Object.keys(projectModules).length === 0) {
-    console.warn('No project files found!');
     return [];
   }
 
@@ -68,13 +64,10 @@ async function loadProjects(): Promise<Content<ProjectFrontmatter>[]> {
           metadata: parsed.metadata,
         } as Content<ProjectFrontmatter>;
       } catch (error) {
-        console.error(`Error parsing project ${path}:`, error);
         throw error;
       }
     })
   );
-
-  console.log('Parsed projects:', projects);
 
   // 按日期降序排列（最新的在前）
   return projects.sort(
@@ -124,7 +117,6 @@ async function loadWriting(): Promise<Content<WritingFrontmatter>[]> {
           metadata: parsed.metadata,
         } as Content<WritingFrontmatter>;
       } catch (error) {
-        console.error(`Error parsing writing ${path}:`, error);
         throw error;
       }
     })
@@ -173,11 +165,8 @@ async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
       const category = categoryMap[path];
 
       if (!category) {
-        console.warn(`Unknown record file: ${path}, skipping...`);
         continue;
       }
-
-      console.log(`[Content] Loading ${category} from ${path}`);
 
       // 使用多记录解析方法
       const parsedRecords = await recordParser.parseMultiRecords(file, category);
@@ -190,15 +179,11 @@ async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
         metadata: parsed.metadata,
       })) as Content<RecordFrontmatter>[];
 
-      console.log(`[Content] Loaded ${contents.length} records for ${category}`);
       allRecords.push(...contents);
     } catch (error) {
-      console.error(`Error parsing record file ${path}:`, error);
       // 继续处理其他文件
     }
   }
-
-  console.log(`[Content] Total records loaded:`, allRecords.length);
 
   // 按日期降序排列
   return allRecords.sort(
@@ -362,7 +347,7 @@ async function loadTop10Movies(): Promise<Top10MovieEntry[]> {
   const parser = new Top10MoviesParser();
   const top10List: Top10MovieEntry[] = [];
 
-  for (const [path, loader] of Object.entries(top10Modules)) {
+  for (const [, loader] of Object.entries(top10Modules)) {
     try {
       const file = await (loader as () => Promise<string>)();
 
@@ -386,14 +371,10 @@ async function loadTop10Movies(): Promise<Top10MovieEntry[]> {
             name: parsed.frontmatter.name,
             movie,
           });
-        } else {
-          console.warn(
-            `[Top10Movies] Movie not found: ${parsed.frontmatter.name}`
-          );
         }
       }
     } catch (error) {
-      console.error(`Error parsing top10-movies file ${path}:`, error);
+      // 忽略错误
     }
   }
 

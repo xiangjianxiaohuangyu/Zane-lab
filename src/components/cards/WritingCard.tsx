@@ -110,7 +110,7 @@ function PoetryCard({ writing }: { writing: Content<WritingFrontmatter> }) {
         </p>
 
         {/* 底部信息 */}
-        <div className="flex items-center justify-between text-sm text-text-secondary pt-4 border-t border-glass-200">
+        <div className="flex items-center justify-end text-sm text-text-secondary pt-4 border-t border-glass-200">
           <span>{formatDate(frontmatter.date)}</span>
         </div>
       </GlassCard>

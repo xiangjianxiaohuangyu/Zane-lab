@@ -62,14 +62,6 @@ export abstract class BaseParser<T> implements IParser<T> {
     // 2. 验证 frontmatter
     const validation = this.validate(data);
 
-    // 记录警告
-    if (validation.warnings.length > 0) {
-      console.warn(
-        `[${this.type}] 解析警告 (${slug}):\n` +
-          validation.warnings.map((w) => `  - ${w.field}: ${w.message}`).join('\n')
-      );
-    }
-
     // 检查是否有 critical 错误
     if (!validation.valid) {
       const criticalErrors = validation.errors.filter((e) => e.severity === 'critical');
