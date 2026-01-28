@@ -13,6 +13,7 @@ export * from './base/ValidationError';
 export { ProjectParser } from './parsers/ProjectParser';
 export { WritingParser } from './parsers/WritingParser';
 export { RecordParser } from './parsers/RecordParser';
+export { Top10MoviesParser } from './parsers/Top10MoviesParser';
 
 // Category 专属解析器
 export { EssayParser } from './parsers/category/EssayParser';

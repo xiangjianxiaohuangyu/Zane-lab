@@ -11,12 +11,14 @@ import type {
   ProjectFrontmatter,
   WritingFrontmatter,
   RecordFrontmatter,
+  Top10MovieEntry,
   Content,
 } from './types';
 import { extractSlug } from './markdown';
 import { ProjectParser } from './parsers';
 import { WritingParser } from './parsers';
 import { RecordParser } from './parsers';
+import { Top10MoviesParser } from './parsers';
 
 /**
  * 加载所有项目内容
@@ -340,4 +342,82 @@ export function getRecordBySlug(
   slug: string
 ): Content<RecordFrontmatter> | undefined {
   return content.records.find((r) => r.slug === slug);
+}
+
+/**
+ * 加载影史十佳列表
+ *
+ * 从 content/records/top10-movies.md 加载影史十佳数据
+ * 根据 name 字段从 movies.md 索引完整电影信息
+ *
+ * @returns 影史十佳条目数组
+ */
+async function loadTop10Movies(): Promise<Top10MovieEntry[]> {
+  // 加载影史十佳文件
+  const top10Modules = import.meta.glob('../../content/records/top10-movies.md', {
+    query: '?raw',
+    import: 'default',
+  });
+
+  const parser = new Top10MoviesParser();
+  const top10List: Top10MovieEntry[] = [];
+
+  for (const [path, loader] of Object.entries(top10Modules)) {
+    try {
+      const file = await (loader as () => Promise<string>)();
+
+      // 解析影史十佳文件
+      const parsedTop10 = await parser.parseMultiRecords(file);
+
+      // 获取所有电影数据
+      const allMovies = content.records.filter(
+        (r) => r.frontmatter.category === 'movie'
+      );
+
+      // 根据 name 索引完整电影信息
+      for (const parsed of parsedTop10) {
+        const movie = allMovies.find(
+          (m) => m.frontmatter.title === parsed.frontmatter.name
+        );
+
+        if (movie) {
+          top10List.push({
+            num: parsed.frontmatter.num,
+            name: parsed.frontmatter.name,
+            movie,
+          });
+        } else {
+          console.warn(
+            `[Top10Movies] Movie not found: ${parsed.frontmatter.name}`
+          );
+        }
+      }
+    } catch (error) {
+      console.error(`Error parsing top10-movies file ${path}:`, error);
+    }
+  }
+
+  // 按 num 排序
+  return top10List.sort((a, b) => a.num - b.num);
+}
+
+/**
+ * 影史十佳缓存
+ */
+let cachedTop10Movies: Top10MovieEntry[] | null = null;
+
+/**
+ * 获取影史十佳（带缓存）
+ *
+ * @returns 影史十佳条目数组
+ */
+export async function getTop10Movies(): Promise<Top10MovieEntry[]> {
+  if (!cachedTop10Movies) {
+    // 确保主内容已加载
+    if (!cachedContent) {
+      cachedContent = await loadAllContent();
+    }
+    cachedTop10Movies = await loadTop10Movies();
+  }
+  return cachedTop10Movies;
 }

@@ -95,7 +95,7 @@ export function Records() {
                       to={`/records/${category}`}
                       className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-all duration-200 group"
                     >
-                      <span>查看所有</span>
+                      <span>查看全部与十佳作品</span>
                       <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>

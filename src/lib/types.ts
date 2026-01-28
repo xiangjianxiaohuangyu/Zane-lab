@@ -186,3 +186,32 @@ export const PROJECT_STATUS_MAP: Record<string, { label: string; color: string }
   'in-progress': { label: '进行中', color: 'text-yellow-400' },
   planned: { label: '计划中', color: 'text-gray-400' },
 };
+
+/**
+ * 影史十佳 Frontmatter 类型定义
+ *
+ * 用于影史十佳榜单的元数据
+ */
+export interface Top10MovieFrontmatter {
+  /** 排名编号 (1-10) */
+  num: number;
+
+  /** 电影名称（用于从 movies.md 索引） */
+  name: string;
+}
+
+/**
+ * 影史十佳条目类型
+ *
+ * 包含排名信息和完整的电影信息
+ */
+export interface Top10MovieEntry {
+  /** 排名编号 */
+  num: number;
+
+  /** 电影名称 */
+  name: string;
+
+  /** 完整的电影记录信息 */
+  movie: Content<RecordFrontmatter>;
+}
