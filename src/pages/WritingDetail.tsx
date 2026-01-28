@@ -27,6 +27,11 @@ export function WritingDetail() {
   const [loading, setLoading] = useState(true);
   const [toc, setToc] = useState<TocItem[]>([]);
 
+  // 滚动到页面顶部
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [slug, category]);
+
   useEffect(() => {
     getContent().then(() => {
       if (slug) {

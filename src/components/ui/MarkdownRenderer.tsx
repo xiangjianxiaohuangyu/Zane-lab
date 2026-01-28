@@ -30,7 +30,15 @@ const STYLE_CONFIGS: Record<MarkdownStyle, string> = {
         prose-p:text-text-secondary     /* 段落颜色：次要文字色 */
         prose-p:leading-loose     /* 行间距：1.25，紧凑 */
         
-        
+        /* 引用块 - <blockquote> */
+        prose-blockquote:border-l-4      /* 引用左侧边框 */
+        prose-blockquote:border-glass-300 /* 边框颜色 */
+        prose-blockquote:bg-glass-50     /* 背景色 */
+        prose-blockquote:py-2            /* 上下内边距 */
+        prose-blockquote:px-4            /* 左右内边距 */
+        prose-blockquote:my-2           /* 上下外边距 */
+        prose-blockquote:text-text-secondary  /* 文字颜色 */
+        prose-blockquote:italic          /* 斜体 */
 
   `,
 

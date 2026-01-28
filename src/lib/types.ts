@@ -58,6 +58,9 @@ export interface WritingFrontmatter {
   /** 年终总结年份（仅 annual 类型使用） */
   years?: string;
 
+  /** 字数统计（可选） */
+  wordCount?: number;
+
   /** 预计阅读时长（分钟，可选） */
   readTime?: number;
 

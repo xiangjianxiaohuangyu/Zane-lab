@@ -40,6 +40,11 @@ export function WritingCategory() {
 
   const categoryLabel = category ? WRITING_CATEGORY_MAP[category] : '未知分类';
 
+  // 小说分类一行显示 2 列，其他分类显示 3 列
+  const gridCols = category === 'fiction'
+    ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
+    : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+
   if (loading) {
     return (
       <div className="py-48">
@@ -54,7 +59,7 @@ export function WritingCategory() {
             浏览所有{categoryLabel}内容
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={gridCols}>
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
@@ -82,7 +87,7 @@ export function WritingCategory() {
 
       {/* 写作列表 */}
       {writings.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={gridCols}>
           {writings.map((writing, index) => (
             <AnimatedWrapper
               key={writing.slug}
