@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * Collapsible 组件属性
@@ -30,16 +30,23 @@ interface CollapsibleProps {
 export function Collapsible({
   title,
   children,
-  defaultExpanded = true,
+  defaultExpanded = false,
   className = '',
 }: CollapsibleProps) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  // 根据屏幕宽度决定默认展开状态
+  const [isExpanded, setIsExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      // 移动端（< 768px）始终折叠，桌面端使用 defaultExpanded
+      return window.innerWidth < 768 ? false : defaultExpanded;
+    }
+    return defaultExpanded;
+  });
 
   return (
     <div className={`glass-card ${className}`}>
       {/* 标题栏 - 可点击切换 */}
       <div
-        className="flex items-center justify-between cursor-pointer p-6"
+        className="flex items-center justify-between cursor-pointer px-6 py-4 md:py-3"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <h2 className="text-2xl font-bold text-text-primary">{title}</h2>
