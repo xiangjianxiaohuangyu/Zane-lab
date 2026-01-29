@@ -4,6 +4,7 @@
 
 ### **一个用于思考、记录与构建的个人数字空间**
 
+[![Live Site](https://img.shields.io/badge/🌐-Live_Site-61DAFB?logo=world&logoColor=white)](https://xiangjianxiaohuangyu.top/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
@@ -16,6 +17,8 @@
 ## ✨ 项目概述
 
 这是我的个人网站，采用 **内容即文件** 的架构设计，用于系统性展示项目成果、文字创作与长期记录内容。
+
+🌐 **在线访问**: [https://xiangjianxiaohuangyu.top](https://xiangjianxiaohuangyu.top)
 
 ### 核心特点
 
