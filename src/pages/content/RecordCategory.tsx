@@ -243,7 +243,7 @@ export function RecordCategory() {
               >
                 <Collapsible
                   title={`${author}（${authorBooks.length}本）`}
-                  defaultExpanded={true}
+                  defaultExpanded={false}
                 >
                   <div className="space-y-6">
                     {authorBooks.map((book) => (
@@ -265,7 +265,7 @@ export function RecordCategory() {
               >
                 <Collapsible
                   title={`${tag}（${tagItems.length}首）`}
-                  defaultExpanded={true}
+                  defaultExpanded={false}
                 >
                   <div className="space-y-6">
                     {tagItems.map((item) => (

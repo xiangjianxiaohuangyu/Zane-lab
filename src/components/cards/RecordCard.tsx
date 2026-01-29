@@ -31,21 +31,28 @@ function VerticalCard({ record, imagePath, extraInfo }: {
       to={`/records/${frontmatter.category}`}
       className="block h-full"
     >
-      <GlassCard hover className="h-full flex flex-col">
-        {/* 图片区域 */}
-        {imagePath && (
-          <div className="w-full h-64">
-            <img
-              src={imagePath}
-              alt={frontmatter.title}
-              className="w-full h-full object-contain"
-              loading="lazy"
-            />
-          </div>
-        )}
+      <GlassCard hover className="h-full flex md:flex-col">
+        {/* 移动端：只显示作品标题 */}
+        <div className="flex-1 flex items-center justify-center p-4 md:hidden">
+          <h3 className="text-lg font-semibold text-text-primary text-center">
+            {frontmatter.title}
+          </h3>
+        </div>
 
-        {/* 内容区域 */}
-        <div className="flex flex-col flex-grow">
+        {/* 桌面端：保持原有纵向布局 */}
+        <div className="hidden md:flex flex-col flex-grow">
+          {/* 图片区域 */}
+          {imagePath && (
+            <div className="w-full h-64">
+              <img
+                src={imagePath}
+                alt={frontmatter.title}
+                className="w-full h-full object-contain"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           {/* 标题 */}
           <h3 className="text-xl font-semibold text-text-primary mt-2 mb-1 text-center truncate">
             {frontmatter.title}
@@ -122,23 +129,23 @@ function HorizontalCard({ record, imagePath, extraInfo }: {
 
         {/* 内容区域 */}
         <div className="flex flex-col flex-1">
-          {/* 标题、导演和标签在同一行 */}
-          <div className="flex items-center gap-4 mb-4">
+          {/* 标题、导演和标签 */}
+          <div className="flex flex-col items-center gap-2 md:gap-4 md:flex-row md:items-center mb-4">
             {/* 标题 */}
-            <h3 className="text-3xl font-semibold text-text-primary truncate text-left flex-shrink-0">
+            <h3 className="text-2xl md:text-3xl font-semibold text-text-primary text-center md:text-left">
               {frontmatter.title}
             </h3>
 
             {/* 作者/导演/开发商/艺术家 */}
             {extraInfo && (
-              <p className="text-text-secondary text-sm truncate text-left">
+              <p className="text-text-secondary text-sm truncate text-center md:text-left">
                 {extraInfo}
               </p>
             )}
 
             {/* 标签 */}
             {frontmatter.tags && frontmatter.tags.length > 0 && (
-              <div className="flex gap-2 flex-wrap ml-auto">
+              <div className="flex gap-2 flex-wrap justify-center md:ml-auto">
                 {frontmatter.tags.map((tag) => (
                   <Badge key={tag} variant="default">
                     {tag}
@@ -150,7 +157,7 @@ function HorizontalCard({ record, imagePath, extraInfo }: {
 
           {/* 个人感想（如果有） */}
           {frontmatter.notes && (
-            <p className="text-text-secondary text-base indent-8 flex-grow line-clamp-4">
+            <p className="text-text-secondary text-sm md:text-base indent-4 md:indent-8 flex-grow">
               {frontmatter.notes}
             </p>
           )}

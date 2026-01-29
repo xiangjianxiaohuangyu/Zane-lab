@@ -30,17 +30,17 @@ export function Top10MovieCard({ entry }: Top10MovieCardProps) {
     : null;
 
   return (
-    <GlassCard hover className="flex flex-row gap-6">
+    <GlassCard hover className="flex flex-col md:flex-row gap-4 md:gap-6">
       {/* 编号圆框 */}
       <div className="flex-shrink-0 flex items-center justify-center">
-        <div className="w-16 h-16 rounded-full bg-glass-300 backdrop-blur-md border-2 border-glass-100 flex items-center justify-center shadow-lg">
-          <span className="text-2xl font-bold text-text-primary">{num}</span>
+        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-glass-300 backdrop-blur-md border-2 border-glass-100 flex items-center justify-center shadow-lg">
+          <span className="text-xl md:text-2xl font-bold text-text-primary">{num}</span>
         </div>
       </div>
 
       {/* 封面图片 */}
       {imagePath && (
-        <div className="w-48 h-64 flex-shrink-0">
+        <div className="w-32 h-44 md:w-48 md:h-64 flex-shrink-0 mx-auto md:mx-0">
           <img
             src={imagePath}
             alt={frontmatter.title}
@@ -53,17 +53,17 @@ export function Top10MovieCard({ entry }: Top10MovieCardProps) {
       {/* 内容区域 */}
       <div className="flex flex-col flex-1">
         {/* 标题、导演、标签 */}
-        <div className="flex items-center gap-4 mb-4">
-          <h3 className="text-3xl font-semibold text-text-primary truncate text-left flex-shrink-0">
+        <div className="flex flex-col items-center gap-2 md:gap-4 md:flex-row md:items-center mb-4">
+          <h3 className="text-2xl md:text-3xl font-semibold text-text-primary text-center md:text-left">
             {frontmatter.title}
           </h3>
           {frontmatter.director && (
-            <p className="text-text-secondary text-sm truncate text-left">
+            <p className="text-text-secondary text-sm truncate text-center md:text-left">
               {frontmatter.director}
             </p>
           )}
           {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <div className="flex gap-2 flex-wrap ml-auto">
+            <div className="flex gap-2 flex-wrap justify-center md:ml-auto">
               {frontmatter.tags.map((tag) => (
                 <Badge key={tag} variant="default">
                   {tag}
@@ -75,7 +75,7 @@ export function Top10MovieCard({ entry }: Top10MovieCardProps) {
 
         {/* 感想 */}
         {frontmatter.notes && (
-          <p className="text-text-secondary text-base indent-8 flex-grow line-clamp-4">
+          <p className="text-text-secondary text-sm md:text-base indent-4 md:indent-8 flex-grow">
             {frontmatter.notes}
           </p>
         )}
