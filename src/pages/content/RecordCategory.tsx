@@ -21,6 +21,49 @@ import type { Content } from '@/lib/types';
 import type { RecordFrontmatter, Top10MovieEntry, Top10GameEntry } from '@/lib/types';
 
 /**
+ * 按作者/艺术家分组
+ */
+const groupByCreator = (
+  items: Content<RecordFrontmatter>[],
+  key: 'author' | 'artist' | 'director' | 'developer'
+) => {
+  const grouped = new Map<string, Content<RecordFrontmatter>[]>();
+
+  items.forEach((item) => {
+    const creator = item.frontmatter[key] || '未知';
+    if (!grouped.has(creator)) {
+      grouped.set(creator, []);
+    }
+    grouped.get(creator)!.push(item);
+  });
+
+  return Array.from(grouped.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0], 'zh-CN')
+  );
+};
+
+/**
+ * 按标签分组（用于音乐）
+ */
+const groupByTags = (items: Content<RecordFrontmatter>[]) => {
+  const grouped = new Map<string, Content<RecordFrontmatter>[]>();
+
+  items.forEach((item) => {
+    const tags = item.frontmatter.tags || [];
+    tags.forEach((tag) => {
+      if (!grouped.has(tag)) {
+        grouped.set(tag, []);
+      }
+      grouped.get(tag)!.push(item);
+    });
+  });
+
+  return Array.from(grouped.entries()).sort((a, b) =>
+    a[0].localeCompare(b[0], 'zh-CN')
+  );
+};
+
+/**
  * RecordCategory 页面组件
  */
 export function RecordCategory() {
@@ -188,17 +231,65 @@ export function RecordCategory() {
         <h2 className="text-2xl font-bold mb-6 text-text-primary">
           喜爱的{categoryLabel}
         </h2>
-        <div className="space-y-6">
-          {records.map((record, index) => (
-            <AnimatedWrapper
-              key={record.slug}
-              delay={index * 50}
-              animation="fade-in-up"
-            >
-              <RecordCard record={record} variant="horizontal" />
-            </AnimatedWrapper>
-          ))}
-        </div>
+
+        {/* 书籍分类：按作者分组 */}
+        {category === 'book' ? (
+          <div className="space-y-6">
+            {groupByCreator(records, 'author').map(([author, authorBooks], authorIndex) => (
+              <AnimatedWrapper
+                key={author}
+                delay={authorIndex * 50}
+                animation="fade-in-up"
+              >
+                <Collapsible
+                  title={`${author}（${authorBooks.length}本）`}
+                  defaultExpanded={true}
+                >
+                  <div className="space-y-6">
+                    {authorBooks.map((book) => (
+                      <RecordCard key={book.slug} record={book} variant="horizontal" />
+                    ))}
+                  </div>
+                </Collapsible>
+              </AnimatedWrapper>
+            ))}
+          </div>
+        ) : category === 'music' ? (
+          /* 音乐分类：按标签分组 */
+          <div className="space-y-6">
+            {groupByTags(records).map(([tag, tagItems], tagIndex) => (
+              <AnimatedWrapper
+                key={tag}
+                delay={tagIndex * 50}
+                animation="fade-in-up"
+              >
+                <Collapsible
+                  title={`${tag}（${tagItems.length}首）`}
+                  defaultExpanded={true}
+                >
+                  <div className="space-y-6">
+                    {tagItems.map((item) => (
+                      <RecordCard key={item.slug} record={item} variant="horizontal" />
+                    ))}
+                  </div>
+                </Collapsible>
+              </AnimatedWrapper>
+            ))}
+          </div>
+        ) : (
+          // 其他分类：保持原有列表布局
+          <div className="space-y-6">
+            {records.map((record, index) => (
+              <AnimatedWrapper
+                key={record.slug}
+                delay={index * 50}
+                animation="fade-in-up"
+              >
+                <RecordCard record={record} variant="horizontal" />
+              </AnimatedWrapper>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
