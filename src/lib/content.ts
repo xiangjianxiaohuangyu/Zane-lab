@@ -12,6 +12,7 @@ import type {
   WritingFrontmatter,
   RecordFrontmatter,
   Top10MovieEntry,
+  Top10GameEntry,
   Content,
 } from './types';
 import { extractSlug } from './markdown';
@@ -19,6 +20,7 @@ import { ProjectParser } from './parsers';
 import { WritingParser } from './parsers';
 import { RecordParser } from './parsers';
 import { Top10MoviesParser } from './parsers';
+import { Top10GamesParser } from './parsers';
 
 /**
  * 加载所有项目内容
@@ -165,11 +167,14 @@ async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
       const category = categoryMap[path];
 
       if (!category) {
+        console.warn(`[loadRecords] Unknown category for path: ${path}`);
         continue;
       }
 
       // 使用多记录解析方法
       const parsedRecords = await recordParser.parseMultiRecords(file, category);
+
+      console.log(`[loadRecords] Parsed ${parsedRecords.length} records from ${path}`);
 
       // 转换为 Content 格式
       const contents = parsedRecords.map((parsed) => ({
@@ -181,9 +186,12 @@ async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
 
       allRecords.push(...contents);
     } catch (error) {
-      // 继续处理其他文件
+      // 记录错误但继续处理其他文件
+      console.error(`[loadRecords] Failed to parse ${path}:`, error);
     }
   }
+
+  console.log(`[loadRecords] Total records loaded: ${allRecords.length}`);
 
   // 按日期降序排列
   return allRecords.sort(
@@ -401,4 +409,78 @@ export async function getTop10Movies(): Promise<Top10MovieEntry[]> {
     cachedTop10Movies = await loadTop10Movies();
   }
   return cachedTop10Movies;
+}
+
+/**
+ * 加载心目中的十佳游戏列表
+ *
+ * 从 content/records/top10-games.md 加载十佳游戏数据
+ * 根据 name 字段从 games.md 索引完整游戏信息
+ *
+ * @returns 十佳游戏条目数组
+ */
+async function loadTop10Games(): Promise<Top10GameEntry[]> {
+  // 加载十佳游戏文件
+  const top10Modules = import.meta.glob('../../content/records/top10-games.md', {
+    query: '?raw',
+    import: 'default',
+  });
+
+  const parser = new Top10GamesParser();
+  const top10List: Top10GameEntry[] = [];
+
+  for (const [, loader] of Object.entries(top10Modules)) {
+    try {
+      const file = await (loader as () => Promise<string>)();
+
+      // 解析十佳游戏文件
+      const parsedTop10 = await parser.parseMultiRecords(file);
+
+      // 获取所有游戏数据
+      const allGames = content.records.filter(
+        (r) => r.frontmatter.category === 'game'
+      );
+
+      // 根据 name 索引完整游戏信息
+      for (const parsed of parsedTop10) {
+        const game = allGames.find(
+          (g) => g.frontmatter.title === parsed.frontmatter.name
+        );
+
+        if (game) {
+          top10List.push({
+            num: parsed.frontmatter.num,
+            name: parsed.frontmatter.name,
+            game,
+          });
+        }
+      }
+    } catch (error) {
+      // 忽略错误
+    }
+  }
+
+  // 按 num 排序
+  return top10List.sort((a, b) => a.num - b.num);
+}
+
+/**
+ * 十佳游戏缓存
+ */
+let cachedTop10Games: Top10GameEntry[] | null = null;
+
+/**
+ * 获取心目中的十佳游戏（带缓存）
+ *
+ * @returns 十佳游戏条目数组
+ */
+export async function getTop10Games(): Promise<Top10GameEntry[]> {
+  if (!cachedTop10Games) {
+    // 确保主内容已加载
+    if (!cachedContent) {
+      cachedContent = await loadAllContent();
+    }
+    cachedTop10Games = await loadTop10Games();
+  }
+  return cachedTop10Games;
 }

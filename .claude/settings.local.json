@@ -12,7 +12,13 @@
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(powershell:*)",
+      "Bash(bash:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)"
     ]
   }
 }

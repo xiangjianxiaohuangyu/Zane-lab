@@ -30,7 +30,7 @@ export function Records() {
     });
   }, []);
 
-  const categories = ['movie', 'book', 'game', 'music'] as const;
+  const categories = ['movie', 'game', 'book', 'music'] as const;
 
   return (
     <section>
@@ -88,7 +88,7 @@ export function Records() {
                   {/* 标题和查看所有链接 */}
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-2xl font-semibold text-text-primary">
-                      {categoryLabel}
+                      喜爱的{categoryLabel}
                       <span className="text-text-secondary text-lg ml-2">({categoryRecords.length})</span>
                     </h3>
                     <Link

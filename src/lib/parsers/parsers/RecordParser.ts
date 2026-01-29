@@ -178,7 +178,8 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
       .filter((block) => block.trim());
 
     // 为每个块添加开头的 ---，使其成为有效的 frontmatter 格式
-    const results = await Promise.all(
+    // 使用 Promise.allSettled 而不是 Promise.all，这样单个块解析失败不会影响其他块
+    const settledResults = await Promise.allSettled(
       blocks.map(async (block, index) => {
         // 生成唯一 slug：分类 + 内容哈希
         const slug = this.generateSlug(block, category, index);
@@ -188,6 +189,21 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
         return result;
       })
     );
+
+    // 过滤出成功解析的结果，记录失败的块
+    const results: ParseResult<RecordFrontmatter>[] = [];
+    settledResults.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        results.push(result.value);
+      } else {
+        console.error(
+          `[RecordParser] Failed to parse ${category} record at index ${index}:`,
+          result.reason
+        );
+      }
+    });
+
+    console.log(`[RecordParser] Successfully parsed ${results.length}/${blocks.length} ${category} records`);
 
     return results;
   }

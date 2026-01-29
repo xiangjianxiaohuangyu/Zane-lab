@@ -215,3 +215,32 @@ export interface Top10MovieEntry {
   /** 完整的电影记录信息 */
   movie: Content<RecordFrontmatter>;
 }
+
+/**
+ * 心目中的十佳游戏 Frontmatter 类型定义
+ *
+ * 用于心目中的十佳游戏榜单的元数据
+ */
+export interface Top10GameFrontmatter {
+  /** 排名编号 (1-10) */
+  num: number;
+
+  /** 游戏名称（用于从 games.md 索引） */
+  name: string;
+}
+
+/**
+ * 心目中的十佳游戏条目类型
+ *
+ * 包含排名信息和完整的游戏信息
+ */
+export interface Top10GameEntry {
+  /** 排名编号 */
+  num: number;
+
+  /** 游戏名称 */
+  name: string;
+
+  /** 完整的游戏记录信息 */
+  game: Content<RecordFrontmatter>;
+}

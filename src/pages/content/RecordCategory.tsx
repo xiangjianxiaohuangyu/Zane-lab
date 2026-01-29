@@ -8,16 +8,17 @@
 
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { getContent, getTop10Movies } from '@/lib/content';
+import { getContent, getTop10Movies, getTop10Games } from '@/lib/content';
 import { RecordCard } from '../../components/cards/RecordCard';
 import { Top10MovieCard } from '../../components/cards/Top10MovieCard';
+import { Top10GameCard } from '../../components/cards/Top10GameCard';
 import { Collapsible } from '../../components/ui/Collapsible';
 import { AnimatedWrapper } from '../../components/ui/AnimatedWrapper';
 import { CardSkeleton } from '../../components/ui/Skeleton';
 import { BackButton } from '../../components/ui/BackButton';
 import { RECORD_CATEGORY_MAP } from '@/lib/types';
 import type { Content } from '@/lib/types';
-import type { RecordFrontmatter, Top10MovieEntry } from '@/lib/types';
+import type { RecordFrontmatter, Top10MovieEntry, Top10GameEntry } from '@/lib/types';
 
 /**
  * RecordCategory 页面组件
@@ -26,6 +27,7 @@ export function RecordCategory() {
   const { category } = useParams<{ category: string }>();
   const [records, setRecords] = useState<Content<RecordFrontmatter>[]>([]);
   const [top10Movies, setTop10Movies] = useState<Top10MovieEntry[]>([]);
+  const [top10Games, setTop10Games] = useState<Top10GameEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 滚动到页面顶部
@@ -47,6 +49,12 @@ export function RecordCategory() {
         if (category === 'movie') {
           const top10 = await getTop10Movies();
           setTop10Movies(top10);
+        }
+
+        // 如果是游戏分类，额外加载十佳游戏
+        if (category === 'game') {
+          const top10 = await getTop10Games();
+          setTop10Games(top10);
         }
       }
 
@@ -140,7 +148,7 @@ export function RecordCategory() {
       {/* 影史十佳区域 - 仅在电影分类显示 */}
       {category === 'movie' && top10Movies.length > 0 && (
         <div className="mb-12">
-          <Collapsible title="心目中的影史十佳" defaultExpanded={true}>
+          <Collapsible title="心目中的十佳电影" defaultExpanded={true}>
             <div className="space-y-6">
               {top10Movies.map((entry) => (
                 <AnimatedWrapper
@@ -149,6 +157,25 @@ export function RecordCategory() {
                   animation="fade-in-up"
                 >
                   <Top10MovieCard entry={entry} />
+                </AnimatedWrapper>
+              ))}
+            </div>
+          </Collapsible>
+        </div>
+      )}
+
+      {/* 心目中的十佳游戏区域 - 仅在游戏分类显示 */}
+      {category === 'game' && top10Games.length > 0 && (
+        <div className="mb-12">
+          <Collapsible title="心目中的十佳游戏" defaultExpanded={true}>
+            <div className="space-y-6">
+              {top10Games.map((entry) => (
+                <AnimatedWrapper
+                  key={entry.game.slug}
+                  delay={entry.num * 50}
+                  animation="fade-in-up"
+                >
+                  <Top10GameCard entry={entry} />
                 </AnimatedWrapper>
               ))}
             </div>
