@@ -5,6 +5,7 @@
  */
 
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Header } from './components/layout/Header';
 import { Container } from './components/layout/Container';
 import { PageTransition } from './components/ui/PageTransition';
@@ -16,6 +17,21 @@ import { WritingCategory } from './pages/WritingCategory';
 import { WritingDetail } from './pages/WritingDetail';
 import { Records } from './pages/Records';
 import { RecordCategory } from './pages/content/RecordCategory';
+
+/**
+ * ScrollToTop 组件
+ *
+ * 在路由变化时自动滚动到页面顶部
+ */
+function ScrollToTop() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  return null;
+}
 
 /**
  * App 内部组件（使用 useLocation）
@@ -68,6 +84,7 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AppContent />
     </Router>
   );

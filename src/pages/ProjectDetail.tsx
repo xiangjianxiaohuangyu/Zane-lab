@@ -69,13 +69,18 @@ export function ProjectDetail() {
 
       {/* 项目头部信息 */}
       <div className="mb-6">
-        <GlassCard className="!pt-12 !px-10 !pb-8">
+        <GlassCard className="!pt-8 !px-10 !pb-8">
           {/* 项目标题 */}
-          <h1 className="text-5xl font-bold text-text-primary mb-4">
-            {frontmatter.title}
-          </h1>
-
-
+          <div className="mb-4">
+            <h1 className="text-5xl font-bold text-text-primary leading-tight">
+              {frontmatter.title}
+            </h1>
+            {frontmatter.englishTitle && (
+              <p className="text-2xl text-text-secondary/80 mt-2 font-medium">
+                {frontmatter.englishTitle}
+              </p>
+            )}
+          </div>
 
           {/* 元数据 */}
           <div className="flex flex-wrap items-center gap-4 mb-4">

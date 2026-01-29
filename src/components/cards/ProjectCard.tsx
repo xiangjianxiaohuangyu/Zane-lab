@@ -47,24 +47,33 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <Link to={`/projects/${slug}`} className="block h-full">
       <GlassCard hover className="h-full flex flex-col !px-8 !pt-8 !pb-4">
         {/* 项目标题 + 状态药丸 + 开源按钮 */}
-        <div className="flex items-center gap-3 mb-4">
-          <h3 className="text-xl font-semibold text-text-primary">
-            {frontmatter.title || '未命名项目'}
-          </h3>
-          <span className={`inline-flex items-center !px-3 !py-1 rounded-full text-sm font-medium glass-card !p-0 border ${statusColorClass}`}>
-            {statusInfo.label}
-          </span>
-          {frontmatter.link && (
-            <a
-              href={frontmatter.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center !px-3 !py-1 rounded-full text-sm font-medium glass-card !p-0 border bg-glass-200 text-text-secondary border-glass-300 hover:bg-glass-300 transition-all"
-            >
-              开源
-            </a>
-          )}
+        <div className="flex items-start gap-3 mb-4">
+          <div className="flex-1">
+            <h3 className="text-2xl font-semibold text-text-primary leading-tight">
+              {frontmatter.title || '未命名项目'}
+            </h3>
+            {frontmatter.englishTitle && (
+              <p className="text-sm text-text-secondary mt-1 font-medium">
+                {frontmatter.englishTitle}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center !px-3 !py-1 rounded-full text-sm font-medium glass-card !p-0 border ${statusColorClass}`}>
+              {statusInfo.label}
+            </span>
+            {frontmatter.link && (
+              <a
+                href={frontmatter.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center !px-3 !py-1 rounded-full text-sm font-medium glass-card !p-0 border bg-glass-200 text-text-secondary border-glass-300 hover:bg-glass-300 transition-all"
+              >
+                开源
+              </a>
+            )}
+          </div>
         </div>
 
         {/* 项目描述 */}

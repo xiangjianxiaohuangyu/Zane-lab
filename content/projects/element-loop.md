@@ -1,5 +1,6 @@
 ---
-title: "Element Loop 元素回环"
+title: "元素回环"
+englishTitle: "Element Loop"
 description: |
   · 操纵环境、诱导反应、修改规则
   · 参与一个持续演化的元素系统

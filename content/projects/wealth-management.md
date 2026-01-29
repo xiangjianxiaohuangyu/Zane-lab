@@ -1,5 +1,6 @@
 ---
-title: "Wealth Management 财富管理"
+title: "财富管理"
+englishTitle: "Wealth Management"
 description: |
   · 基于 Electron + React + TypeScript 的个人财富管理应用
   · 用于追踪资产、规划投资、分析财富增长

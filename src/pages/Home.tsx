@@ -21,7 +21,7 @@ export function Home() {
       <Hero />
 
       {/* 功能卡片区 */}
-      <section className="py-8 -mt-20">
+      <section className="py-8 -mt-8 md:-mt-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* 项目卡片 */}
           <FeatureCard

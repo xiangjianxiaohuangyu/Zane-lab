@@ -1,5 +1,6 @@
 ---
-title: "Zane's Lab 数字空间"
+title: "数字空间"
+englishTitle: "Zane's Lab"
 description: |
   · 基于 Vite + React + TypeScript 的个人数字空间
   · 用于思考、记录与构建

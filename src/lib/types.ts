@@ -6,8 +6,11 @@ import type { TocItem } from './toc';
  * 用于项目展示页面的元数据
  */
 export interface ProjectFrontmatter {
-  /** 项目标题 */
+  /** 项目标题（中文） */
   title: string;
+
+  /** 项目英文标题 */
+  englishTitle: string;
 
   /** 项目简述 */
   description: string;
