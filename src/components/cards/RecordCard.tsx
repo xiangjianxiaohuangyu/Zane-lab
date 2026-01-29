@@ -129,35 +129,32 @@ function HorizontalCard({ record, imagePath, extraInfo }: {
 
         {/* 内容区域 */}
         <div className="flex flex-col flex-1">
-          {/* 标题、导演和标签 */}
-          <div className="flex flex-col items-center gap-2 md:gap-4 md:flex-row md:items-center mb-4">
-            {/* 标题 */}
-            <h3 className="text-2xl md:text-3xl font-semibold text-text-primary text-center md:text-left">
-              {frontmatter.title}
-            </h3>
+          {/* 标题 */}
+          <h3 className="text-2xl md:text-3xl font-semibold text-text-primary mb-2">
+            {frontmatter.title}
+          </h3>
 
-            {/* 作者/导演/开发商/艺术家 */}
-            {extraInfo && (
-              <p className="text-text-secondary text-sm truncate text-center md:text-left">
-                {extraInfo}
-              </p>
-            )}
+          {/* 作者/导演/开发商/艺术家 */}
+          {extraInfo && (
+            <p className="text-text-secondary text-base mb-3">
+              {extraInfo}
+            </p>
+          )}
 
-            {/* 标签 */}
-            {frontmatter.tags && frontmatter.tags.length > 0 && (
-              <div className="flex gap-2 flex-wrap justify-center md:ml-auto">
-                {frontmatter.tags.map((tag) => (
-                  <Badge key={tag} variant="default">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* 标签 */}
+          {frontmatter.tags && frontmatter.tags.length > 0 && (
+            <div className="flex gap-2 flex-wrap mb-4">
+              {frontmatter.tags.map((tag) => (
+                <Badge key={tag} variant="default">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* 个人感想（如果有） */}
           {frontmatter.notes && (
-            <p className="text-text-secondary text-sm md:text-base indent-4 md:indent-8 flex-grow">
+            <p className="text-text-secondary text-sm md:text-base indent-4 md:indent-8 flex-grow mb-4">
               {frontmatter.notes}
             </p>
           )}

@@ -58,7 +58,7 @@ export function Top10GameCard({ entry }: Top10GameCardProps) {
             {frontmatter.title}
           </h3>
           {frontmatter.developer && (
-            <p className="text-text-secondary text-sm truncate text-center md:text-left">
+            <p className="text-text-secondary text-sm truncate whitespace-nowrap text-center md:text-left">
               {frontmatter.developer}
             </p>
           )}

@@ -58,7 +58,7 @@ export function Top10MovieCard({ entry }: Top10MovieCardProps) {
             {frontmatter.title}
           </h3>
           {frontmatter.director && (
-            <p className="text-text-secondary text-sm truncate text-center md:text-left">
+            <p className="text-text-secondary text-sm truncate whitespace-nowrap text-center md:text-left">
               {frontmatter.director}
             </p>
           )}
