@@ -19,7 +19,8 @@
       "Bash(bash:*)",
       "Bash(grep:*)",
       "Bash(chmod:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(find:*)"
     ]
   }
 }

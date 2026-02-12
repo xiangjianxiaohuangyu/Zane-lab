@@ -4,10 +4,11 @@ import { Link, useLocation } from 'react-router-dom';
  * 导航链接配置
  */
 const navLinks = [
-  { path: '/', label: '首页' },
-  { path: '/projects', label: '项目' },
-  { path: '/writing', label: '写作' },
-  { path: '/records', label: '记录' },
+  {path: '/', label: '首页'},
+  {path: '/projects', label: '项目'},
+  {path: '/writing', label: '写作'},
+  {path: '/records', label: '记录'},
+  {path: '/ai-lab', label: 'AI Lab'},
 ];
 
 /**

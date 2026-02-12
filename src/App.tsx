@@ -17,6 +17,7 @@ import { WritingCategory } from './pages/WritingCategory';
 import { WritingDetail } from './pages/WritingDetail';
 import { Records } from './pages/Records';
 import { RecordCategory } from './pages/content/RecordCategory';
+import { AiLab } from './pages/AiLab';
 
 /**
  * ScrollToTop 组件
@@ -64,6 +65,9 @@ function AppContent() {
               {/* 记录路由 */}
               <Route path="/records" element={<Records />} />
               <Route path="/records/:category" element={<RecordCategory />} />
+
+              {/* AI Lab 路由 */}
+              <Route path="/ai-lab" element={<AiLab />} />
 
               {/* TODO: 后续添加详情页路由 */}
               {/* <Route path="/writing/:category/:slug" element={<WritingDetail />} /> */}
