@@ -27,3 +27,6 @@ dist-ssr
 # 构建输出
 build
 .cache
+
+#未发布作品
+nopublish
