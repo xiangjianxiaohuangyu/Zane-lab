@@ -75,16 +75,26 @@ export interface WritingFrontmatter {
 }
 
 /**
+ * 记录分类
+ *
+ * 在 frontmatter 中用 category 字段声明
+ */
+export type RecordCategory = 'movie' | 'book' | 'game' | 'music';
+
+/**
  * 记录 Frontmatter 类型定义
  *
  * 用于个人记录（电影、书籍、游戏、音乐）的元数据
+ *
+ * content/records/ 下一个 .md 文件 = 一条记录，
+ * 记录属于哪一类由 frontmatter 的 category 字段决定
  */
 export interface RecordFrontmatter {
   /** 作品名称 */
   title: string;
 
   /** 记录分类 */
-  category: 'movie' | 'book' | 'game' | 'music';
+  category: RecordCategory;
 
   /** 记录日期（ISO 8601 格式） */
   date: string;
@@ -98,17 +108,17 @@ export interface RecordFrontmatter {
   /** 封面图片路径（可选） */
   cover?: string;
 
-  /** 作者（书籍专用，可选） */
-  author?: string;
+  /**
+   * 附加图集图片路径列表（可选）
+   *
+   * 与 cover 职责不同：cover 是海报/封面，images 是剧照、截图、内页等附加画面。
+   * 文件名相对于 public/images/records/，磁盘结构保持扁平，不分子目录。
+   * 详情页以响应式网格展示，点击可进入灯箱。
+   */
+  images?: string[];
 
-  /** 开发商（游戏专用，可选） */
-  developer?: string;
-
-  /** 艺术家（音乐专用，可选） */
-  artist?: string;
-
-  /** 导演（电影专用，可选） */
-  director?: string;
+  /** 创作者名字（电影为导演、书籍为作者、游戏为开发商、音乐为艺术家，可选） */
+  name?: string;
 
   /** 个人感想（可选） */
   notes?: string;
@@ -189,61 +199,3 @@ export const PROJECT_STATUS_MAP: Record<string, { label: string; color: string }
   'in-progress': { label: '进行中', color: 'text-yellow-400' },
   planned: { label: '计划中', color: 'text-gray-400' },
 };
-
-/**
- * 影史十佳 Frontmatter 类型定义
- *
- * 用于影史十佳榜单的元数据
- */
-export interface Top10MovieFrontmatter {
-  /** 排名编号 (1-10) */
-  num: number;
-
-  /** 电影名称（用于从 movies.md 索引） */
-  name: string;
-}
-
-/**
- * 影史十佳条目类型
- *
- * 包含排名信息和完整的电影信息
- */
-export interface Top10MovieEntry {
-  /** 排名编号 */
-  num: number;
-
-  /** 电影名称 */
-  name: string;
-
-  /** 完整的电影记录信息 */
-  movie: Content<RecordFrontmatter>;
-}
-
-/**
- * 心目中的十佳游戏 Frontmatter 类型定义
- *
- * 用于心目中的十佳游戏榜单的元数据
- */
-export interface Top10GameFrontmatter {
-  /** 排名编号 (1-10) */
-  num: number;
-
-  /** 游戏名称（用于从 games.md 索引） */
-  name: string;
-}
-
-/**
- * 心目中的十佳游戏条目类型
- *
- * 包含排名信息和完整的游戏信息
- */
-export interface Top10GameEntry {
-  /** 排名编号 */
-  num: number;
-
-  /** 游戏名称 */
-  name: string;
-
-  /** 完整的游戏记录信息 */
-  game: Content<RecordFrontmatter>;
-}

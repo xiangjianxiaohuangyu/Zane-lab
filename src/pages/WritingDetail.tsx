@@ -8,15 +8,15 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getWritingBySlug, getContent } from '../lib/content';
 import { formatDate } from '../lib/date';
-import { extractToc } from '../lib/toc';
+// import { extractToc } from '../lib/toc';
 import { MarkdownRenderer } from '../components/ui/MarkdownRenderer';
 import { BackButton } from '../components/ui/BackButton';
 import { Badge } from '../components/ui/Badge';
 import { GlassCard } from '../components/ui/GlassCard';
-import { TableOfContents } from '../components/ui/TableOfContents';
+// import { TableOfContents } from '../components/ui/TableOfContents';
 import type { Content } from '../lib/types';
 import type { WritingFrontmatter } from '../lib/types';
-import type { TocItem } from '../lib/toc';
+// import type { TocItem } from '../lib/toc';
 
 /**
  * WritingDetail 页面组件
@@ -25,7 +25,7 @@ export function WritingDetail() {
   const { category, slug } = useParams<{ category: string; slug: string }>();
   const [writing, setWriting] = useState<Content<WritingFrontmatter> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [toc, setToc] = useState<TocItem[]>([]);
+  // const [toc, setToc] = useState<TocItem[]>([]);
 
   // 滚动到页面顶部
   useEffect(() => {
@@ -39,8 +39,8 @@ export function WritingDetail() {
         if (data) {
           setWriting(data);
           // 提取目录
-          const tocItems = extractToc(data.content);
-          setToc(tocItems);
+          // const tocItems = extractToc(data.content);
+          // setToc(tocItems);
         } else {
           setWriting(null);
         }
@@ -71,7 +71,7 @@ export function WritingDetail() {
   }
 
   const { frontmatter, content } = writing;
-  const showToc = frontmatter.showToc && toc.length > 0;
+  // const showToc = frontmatter.showToc && toc.length > 0;
 
   // 判断是否为诗集（poetry），使用居中样式
   const isPoetry = frontmatter.category === 'poetry';
@@ -86,7 +86,7 @@ export function WritingDetail() {
       </div>
 
       {/* 左侧目录（仅在 showToc 为 true 时显示） */}
-      {showToc && <TableOfContents toc={toc} />}
+      {/* {showToc && <TableOfContents toc={toc} />} */}
 
       {/* 文章头部信息 */}
       <div className="mb-6">

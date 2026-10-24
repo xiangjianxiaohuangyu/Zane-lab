@@ -1,18 +1,39 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { RecordCard } from '../cards/RecordCard';
 import { AnimatedWrapper } from '../ui/AnimatedWrapper';
-import { CardSkeleton } from '../ui/Skeleton';
+import { ListSkeleton } from '../ui/Skeleton';
 import { getContent } from '@/lib/content';
+import { RECORD_CATEGORY_MAP } from '@/lib/types';
 import type { Content } from '@/lib/types';
 import type { RecordFrontmatter } from '@/lib/types';
-import { RECORD_CATEGORY_MAP } from '@/lib/types';
+
+/**
+ * 可筛选的分类
+ *
+ * 按展示顺序排列，activeClass 为该分类被选中时的高亮配色
+ */
+const FILTERS = [
+  {
+    category: 'movie',
+    activeClass: 'bg-pink-500/20 text-pink-300 border-pink-500/40',
+  },
+  {
+    category: 'book',
+    activeClass: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+  },
+  {
+    category: 'game',
+    activeClass: 'bg-green-500/20 text-green-400 border-green-500/40',
+  },
+] as const;
+
+type FilterCategory = (typeof FILTERS)[number]['category'];
 
 /**
  * Records 区块组件
  *
- * 记录分类区块，展示四个记录分类入口
- * 用于记录分类页
+ * 记录列表区块，一条记录一张大卡片，按时间倒序排列（最新的在最前面）
+ * 支持按电影 / 书籍 / 游戏多选叠加筛选
  *
  * @example
  * ```tsx
@@ -22,117 +43,110 @@ import { RECORD_CATEGORY_MAP } from '@/lib/types';
 export function Records() {
   const [records, setRecords] = useState<Content<RecordFrontmatter>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<FilterCategory[]>([]);
 
   useEffect(() => {
-    getContent().then((data) => {
-      setRecords(data.records);
-      setLoading(false);
-    });
+    getContent()
+      .then((data) => {
+        setRecords(data.records);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to load records:', error);
+        setLoading(false);
+      });
   }, []);
 
-  const categories = ['movie', 'game', 'book', 'music'] as const;
+  // 统计每个分类的条数，只有存在的分类才展示筛选按钮
+  const counts = records.reduce<Partial<Record<FilterCategory, number>>>(
+    (acc, record) => {
+      const { category } = record.frontmatter;
+      acc[category as FilterCategory] =
+        (acc[category as FilterCategory] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
+  const availableFilters = FILTERS.filter(({ category }) =>
+    (counts[category] ?? 0) > 0
+  );
+
+  // 未选中任何分类时展示全部
+  const visible = records.filter(
+    (record) =>
+      filters.length === 0 ||
+      filters.includes(record.frontmatter.category as FilterCategory)
+  );
+
+  function toggleFilter(category: FilterCategory) {
+    setFilters((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  }
 
   return (
     <section>
-      {/* 加载状态 */}
-      {loading ? (
-        <div className="space-y-12">
-          {categories.map((category) => {
-            const categoryLabel = RECORD_CATEGORY_MAP[category];
+      {/* 筛选按钮 - 多选可叠加 */}
+      {availableFilters.length > 1 && (
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <button
+            type="button"
+            onClick={() => setFilters([])}
+            className={`px-4 py-2 rounded-full text-sm border backdrop-blur-md transition-all duration-200 ${
+              filters.length === 0
+                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                : 'bg-glass-300 text-text-secondary border-glass-100 hover:bg-glass-400'
+            }`}
+          >
+            全部 {records.length}
+          </button>
+          {availableFilters.map(({ category, activeClass }) => {
+            const active = filters.includes(category);
             return (
-              <div key={category}>
-                {/* 分类标题 */}
-                <div className="mb-6">
-                  {/* 标题和查看所有链接 */}
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-2xl font-semibold text-text-primary">
-                      {categoryLabel}
-                    </h3>
-                    <Link
-                      to={`/records/${category}`}
-                      className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-all duration-200 group"
-                    >
-                      <span>查看所有</span>
-                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  </div>
-
-                  {/* 分隔线 */}
-                  <div className="border-b border-glass-200 mb-6"></div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  <CardSkeleton />
-                  <CardSkeleton />
-                  <CardSkeleton />
-                  <CardSkeleton />
-                </div>
-              </div>
+              <button
+                key={category}
+                type="button"
+                onClick={() => toggleFilter(category)}
+                className={`px-4 py-2 rounded-full text-sm border backdrop-blur-md transition-all duration-200 ${
+                  active
+                    ? activeClass
+                    : 'bg-glass-300 text-text-secondary border-glass-100 hover:bg-glass-400'
+                }`}
+              >
+                {RECORD_CATEGORY_MAP[category]} {counts[category]}
+              </button>
             );
           })}
         </div>
+      )}
+
+      {/* 加载状态 */}
+      {loading ? (
+        <ListSkeleton />
+      ) : visible.length > 0 ? (
+        // 记录列表 - 一条记录一张大卡片
+        <div className="space-y-6">
+          {visible.map((record, index) => (
+            <AnimatedWrapper
+              key={record.slug}
+              delay={index * 100}
+              animation="fade-in-up"
+            >
+              <RecordCard record={record} />
+            </AnimatedWrapper>
+          ))}
+        </div>
       ) : (
-        // 分类网格
-        <div className="space-y-12">
-          {categories.map((category) => {
-            const categoryRecords = records.filter(
-              (r) => r.frontmatter.category === category
-            );
-            const categoryLabel = RECORD_CATEGORY_MAP[category];
-
-            return (
-              <div key={category}>
-                {/* 分类标题 */}
-                <div className="mb-6">
-                  {/* 标题和查看所有链接 */}
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-2xl font-semibold text-text-primary">
-                      喜爱的{categoryLabel}
-                      <span className="text-text-secondary text-lg ml-2">({categoryRecords.length})</span>
-                    </h3>
-                    <Link
-                      to={`/records/${category}`}
-                      className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-all duration-200 group"
-                    >
-                      <span>查看全部与十佳作品</span>
-                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  </div>
-
-                  {/* 分隔线 */}
-                  <div className="border-b border-glass-200 mb-6"></div>
-                </div>
-
-                {/* 该分类下的记录列表 */}
-                {categoryRecords.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {categoryRecords.slice(0, 4).map((record, index) => (
-                      <AnimatedWrapper
-                        key={record.slug}
-                        delay={index * 100}
-                        animation="fade-in-up"
-                      >
-                        <RecordCard record={record} />
-                      </AnimatedWrapper>
-                    ))}
-                  </div>
-                ) : (
-                  // 空状态
-                  <div className="text-center py-12 glass-card rounded-2xl">
-                    <p className="text-text-secondary text-lg">
-                      暂无{categoryLabel}记录
-                    </p>
-                    <p className="text-text-secondary/60 text-sm mt-2">
-                      记录将在添加后自动显示
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        // 空状态
+        <div className="text-center py-12">
+          <p className="text-text-secondary text-lg">
+            暂无记录
+          </p>
+          <p className="text-text-secondary/60 text-sm mt-2">
+            记录将在添加后自动显示
+          </p>
         </div>
       )}
     </section>

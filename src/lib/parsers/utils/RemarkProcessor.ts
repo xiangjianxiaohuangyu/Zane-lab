@@ -8,6 +8,14 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkSlug from 'remark-slug';
 import remarkHtml from 'remark-html';
+import type { Options } from 'remark-html';
+
+/**
+ * Remark 图片节点处理器
+ *
+ * 与 remark-html 支持的 handlers.image 签名一致
+ */
+export type ImageHandler = NonNullable<NonNullable<Options['handlers']>['image']>;
 
 /**
  * Remark 处理器类
@@ -36,6 +44,29 @@ export class RemarkProcessor {
    */
   static async process(content: string): Promise<string> {
     const result = await this.processor.process(content);
+    return result.toString();
+  }
+
+  /**
+   * 使用自定义图片处理器转换 Markdown
+   *
+   * 供需要定制图片标签（懒加载、可聚焦、ARIA 等）的解析器使用。
+   * 插件顺序与 process() 保持一致，避免不同内容类型之间出现行为漂移。
+   *
+   * @param content - Markdown 原始内容
+   * @param imageHandler - 自定义图片节点处理器
+   * @returns HTML 字符串
+   */
+  static async processWithImageHandler(
+    content: string,
+    imageHandler: ImageHandler
+  ): Promise<string> {
+    const processor = remark()
+      .use(remarkGfm as any)
+      .use(remarkSlug as any)
+      .use(remarkHtml, { sanitize: false, handlers: { image: imageHandler } });
+
+    const result = await processor.process(content);
     return result.toString();
   }
 

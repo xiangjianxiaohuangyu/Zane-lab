@@ -2,6 +2,11 @@
  * TableOfContents 目录组件
  *
  * 显示文章的目录结构，支持点击跳转和滚动高亮
+ *
+ * 【当前未启用】目录以 fixed 浮层形式挂在 body 上，会遮挡文章标题卡片，
+ * 因此 WritingDetail 中对它的调用已注释掉。若要恢复，需要同时：
+ *   1. 取消 WritingDetail.tsx 中 TableOfContents / extractToc / TocItem 的引用注释
+ *   2. 在文章容器上给 lg+ 预留左侧留白（lg:pl-64），让目录有独立栏位
  */
 
 import { useEffect, useState } from 'react';
@@ -70,7 +75,8 @@ export function TableOfContents({ toc }: TableOfContentsProps) {
   }
 
   return createPortal(
-    <div className="hidden lg:block fixed left-8 top-32 w-38 max-h-[60vh] overflow-y-auto overflow-x-hidden">
+    // z-30：目录浮于正文卡片之上；宽度固定为 14rem，配合正文列 lg:pl-64 的留白互不遮挡
+    <div className="hidden lg:block fixed left-8 top-32 z-30 w-56 max-h-[60vh] overflow-y-auto overflow-x-hidden">
       <div className="py-4">
           <h4 className="text-sm font-semibold text-text-primary mb-3 px-2">
             目录

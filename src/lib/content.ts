@@ -11,16 +11,12 @@ import type {
   ProjectFrontmatter,
   WritingFrontmatter,
   RecordFrontmatter,
-  Top10MovieEntry,
-  Top10GameEntry,
   Content,
 } from './types';
 import { extractSlug } from './markdown';
 import { ProjectParser } from './parsers';
 import { WritingParser } from './parsers';
 import { RecordParser } from './parsers';
-import { Top10MoviesParser } from './parsers';
-import { Top10GamesParser } from './parsers';
 
 /**
  * 加载所有项目内容
@@ -135,14 +131,14 @@ async function loadWriting(): Promise<Content<WritingFrontmatter>[]> {
 /**
  * 加载所有记录内容
  *
- * 从 content/records/ 目录加载 4 个分类文件（movies, books, games, music）
- * 每个文件包含多个记录，使用连续的 frontmatter 格式
+ * 从 content/records/ 加载所有 .md 文件
+ * 一个文件 = 一条记录，记录属于哪一类由 frontmatter 的 category 字段决定
  * 按日期降序排列（最新的在前）
  *
  * @returns 记录内容数组
  */
 async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
-  // 加载 4 个分类文件
+  // 加载所有记录文件
   const recordModules = import.meta.glob('../../content/records/*.md', {
     query: '?raw',
     import: 'default',
@@ -150,50 +146,39 @@ async function loadRecords(): Promise<Content<RecordFrontmatter>[]> {
 
   // 创建记录解析器
   const recordParser = new RecordParser();
-  const allRecords: Content<RecordFrontmatter>[] = [];
 
-  // 定义分类映射（从文件名提取分类）
-  const categoryMap: Record<string, 'movie' | 'book' | 'game' | 'music'> = {
-    '../../content/records/movies.md': 'movie',
-    '../../content/records/books.md': 'book',
-    '../../content/records/games.md': 'game',
-    '../../content/records/music.md': 'music',
-  };
+  // 解析所有记录文件
+  const parsed = await Promise.all(
+    Object.entries(recordModules).map(async ([path, loader]) => {
+      // slug 取自文件名，如 in-the-mood-for-love
+      const slug = extractSlug(path);
 
-  // 解析每个分类文件
-  for (const [path, loader] of Object.entries(recordModules)) {
-    try {
-      const file = await (loader as () => Promise<string>)();
-      const category = categoryMap[path];
+      try {
+        const file = await (loader as () => Promise<string>)();
 
-      if (!category) {
-        console.warn(`[loadRecords] Unknown category for path: ${path}`);
-        continue;
+        const result = await recordParser.parse(file, slug);
+
+        return {
+          frontmatter: result.frontmatter,
+          content: result.content,
+          slug,
+          metadata: result.metadata,
+        } as Content<RecordFrontmatter>;
+      } catch (error) {
+        // 记录错误但继续处理其他文件
+        console.error(`[loadRecords] Failed to parse ${path}:`, error);
+        return null;
       }
+    })
+  );
 
-      // 使用多记录解析方法
-      const parsedRecords = await recordParser.parseMultiRecords(file, category);
-
-      console.log(`[loadRecords] Parsed ${parsedRecords.length} records from ${path}`);
-
-      // 转换为 Content 格式
-      const contents = parsedRecords.map((parsed) => ({
-        frontmatter: parsed.frontmatter,
-        content: parsed.content,
-        slug: parsed.slug || `${category}-${Date.now()}`,
-        metadata: parsed.metadata,
-      })) as Content<RecordFrontmatter>[];
-
-      allRecords.push(...contents);
-    } catch (error) {
-      // 记录错误但继续处理其他文件
-      console.error(`[loadRecords] Failed to parse ${path}:`, error);
-    }
-  }
+  const allRecords = parsed.filter(
+    (record): record is Content<RecordFrontmatter> => record !== null
+  );
 
   console.log(`[loadRecords] Total records loaded: ${allRecords.length}`);
 
-  // 按日期降序排列
+  // 按日期降序排列（最新的在最前）
   return allRecords.sort(
     (a, b) =>
       new Date(b.frontmatter.date).getTime() -
@@ -238,42 +223,69 @@ export async function loadAllContent() {
 }
 
 /**
- * 内容导出对象（初始为空）
- *
- * 在应用启动时异步加载
+ * 全量内容
  */
-let cachedContent: {
+type ContentBundle = {
   projects: Content<ProjectFrontmatter>[];
   writing: Content<WritingFrontmatter>[];
   records: Content<RecordFrontmatter>[];
-} | null = null;
+};
 
 /**
- * 获取内容（带缓存）
+ * 内容缓存
  *
- * 首次调用时加载内容，后续调用返回缓存
+ * 在应用启动时异步加载
  */
-export async function getContent() {
-  if (!cachedContent) {
-    cachedContent = await loadAllContent();
-  }
-  return cachedContent;
-}
+let cachedContent: ContentBundle | null = null;
+
+/**
+ * 进行中的加载任务
+ *
+ * 避免并发调用重复发起同一批加载
+ */
+let pendingLoad: Promise<ContentBundle> | null = null;
 
 // 为了向后兼容，导出一个同步的 content 对象
-// 注意：初始值为空数组，需要先调用 getContent()
+// 注意：初始值为空数组，getContent() 完成后才会被填充
 export const content = {
   projects: [] as Content<ProjectFrontmatter>[],
   writing: [] as Content<WritingFrontmatter>[],
   records: [] as Content<RecordFrontmatter>[],
 };
 
-// 在模块加载时自动初始化（仅在支持的环境中）
-if (typeof window !== 'undefined') {
-  getContent().then((data) => {
+/**
+ * 获取内容（带缓存）
+ *
+ * 首次调用时加载内容，后续调用返回缓存。
+ * 同步的 content 对象在返回前就会被填充，
+ * 这样调用方拿到结果时 getContentBySlug 之类的同步查询一定能查到。
+ */
+export async function getContent() {
+  if (cachedContent) {
+    return cachedContent;
+  }
+
+  pendingLoad ??= loadAllContent().then((data) => {
+    cachedContent = data;
     content.projects = data.projects;
     content.writing = data.writing;
     content.records = data.records;
+    return data;
+  });
+
+  try {
+    return await pendingLoad;
+  } catch (error) {
+    // 加载失败时清掉 pendingLoad，允许下次重试
+    pendingLoad = null;
+    throw error;
+  }
+}
+
+// 在模块加载时自动初始化（仅在支持的环境中）
+if (typeof window !== 'undefined') {
+  getContent().catch((error) => {
+    console.error('[content] 预加载失败:', error);
   });
 }
 
@@ -287,18 +299,6 @@ export function getWritingByCategory(
   category: 'essay' | 'annual' | 'fiction' | 'poetry'
 ): Content<WritingFrontmatter>[] {
   return content.writing.filter((w) => w.frontmatter.category === category);
-}
-
-/**
- * 根据分类筛选记录内容
- *
- * @param category - 记录分类 (movie | book | game | music)
- * @returns 该分类下的所有记录内容
- */
-export function getRecordsByCategory(
-  category: 'movie' | 'book' | 'game' | 'music'
-): Content<RecordFrontmatter>[] {
-  return content.records.filter((r) => r.frontmatter.category === category);
 }
 
 /**
@@ -335,152 +335,4 @@ export function getRecordBySlug(
   slug: string
 ): Content<RecordFrontmatter> | undefined {
   return content.records.find((r) => r.slug === slug);
-}
-
-/**
- * 加载影史十佳列表
- *
- * 从 content/records/top10-movies.md 加载影史十佳数据
- * 根据 name 字段从 movies.md 索引完整电影信息
- *
- * @returns 影史十佳条目数组
- */
-async function loadTop10Movies(): Promise<Top10MovieEntry[]> {
-  // 加载影史十佳文件
-  const top10Modules = import.meta.glob('../../content/records/top10-movies.md', {
-    query: '?raw',
-    import: 'default',
-  });
-
-  const parser = new Top10MoviesParser();
-  const top10List: Top10MovieEntry[] = [];
-
-  for (const [, loader] of Object.entries(top10Modules)) {
-    try {
-      const file = await (loader as () => Promise<string>)();
-
-      // 解析影史十佳文件
-      const parsedTop10 = await parser.parseMultiRecords(file);
-
-      // 获取所有电影数据
-      const allMovies = content.records.filter(
-        (r) => r.frontmatter.category === 'movie'
-      );
-
-      // 根据 name 索引完整电影信息
-      for (const parsed of parsedTop10) {
-        const movie = allMovies.find(
-          (m) => m.frontmatter.title === parsed.frontmatter.name
-        );
-
-        if (movie) {
-          top10List.push({
-            num: parsed.frontmatter.num,
-            name: parsed.frontmatter.name,
-            movie,
-          });
-        }
-      }
-    } catch (error) {
-      // 忽略错误
-    }
-  }
-
-  // 按 num 排序
-  return top10List.sort((a, b) => a.num - b.num);
-}
-
-/**
- * 影史十佳缓存
- */
-let cachedTop10Movies: Top10MovieEntry[] | null = null;
-
-/**
- * 获取影史十佳（带缓存）
- *
- * @returns 影史十佳条目数组
- */
-export async function getTop10Movies(): Promise<Top10MovieEntry[]> {
-  if (!cachedTop10Movies) {
-    // 确保主内容已加载
-    if (!cachedContent) {
-      cachedContent = await loadAllContent();
-    }
-    cachedTop10Movies = await loadTop10Movies();
-  }
-  return cachedTop10Movies;
-}
-
-/**
- * 加载心目中的十佳游戏列表
- *
- * 从 content/records/top10-games.md 加载十佳游戏数据
- * 根据 name 字段从 games.md 索引完整游戏信息
- *
- * @returns 十佳游戏条目数组
- */
-async function loadTop10Games(): Promise<Top10GameEntry[]> {
-  // 加载十佳游戏文件
-  const top10Modules = import.meta.glob('../../content/records/top10-games.md', {
-    query: '?raw',
-    import: 'default',
-  });
-
-  const parser = new Top10GamesParser();
-  const top10List: Top10GameEntry[] = [];
-
-  for (const [, loader] of Object.entries(top10Modules)) {
-    try {
-      const file = await (loader as () => Promise<string>)();
-
-      // 解析十佳游戏文件
-      const parsedTop10 = await parser.parseMultiRecords(file);
-
-      // 获取所有游戏数据
-      const allGames = content.records.filter(
-        (r) => r.frontmatter.category === 'game'
-      );
-
-      // 根据 name 索引完整游戏信息
-      for (const parsed of parsedTop10) {
-        const game = allGames.find(
-          (g) => g.frontmatter.title === parsed.frontmatter.name
-        );
-
-        if (game) {
-          top10List.push({
-            num: parsed.frontmatter.num,
-            name: parsed.frontmatter.name,
-            game,
-          });
-        }
-      }
-    } catch (error) {
-      // 忽略错误
-    }
-  }
-
-  // 按 num 排序
-  return top10List.sort((a, b) => a.num - b.num);
-}
-
-/**
- * 十佳游戏缓存
- */
-let cachedTop10Games: Top10GameEntry[] | null = null;
-
-/**
- * 获取心目中的十佳游戏（带缓存）
- *
- * @returns 十佳游戏条目数组
- */
-export async function getTop10Games(): Promise<Top10GameEntry[]> {
-  if (!cachedTop10Games) {
-    // 确保主内容已加载
-    if (!cachedContent) {
-      cachedContent = await loadAllContent();
-    }
-    cachedTop10Games = await loadTop10Games();
-  }
-  return cachedTop10Games;
 }

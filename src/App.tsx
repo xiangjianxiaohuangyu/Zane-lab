@@ -16,7 +16,7 @@ import { Writing } from './pages/Writing';
 import { WritingCategory } from './pages/WritingCategory';
 import { WritingDetail } from './pages/WritingDetail';
 import { Records } from './pages/Records';
-import { RecordCategory } from './pages/content/RecordCategory';
+import { RecordDetail } from './pages/RecordDetail';
 import { AiLab } from './pages/AiLab';
 
 /**
@@ -64,14 +64,10 @@ function AppContent() {
 
               {/* 记录路由 */}
               <Route path="/records" element={<Records />} />
-              <Route path="/records/:category" element={<RecordCategory />} />
+              <Route path="/records/:slug" element={<RecordDetail />} />
 
               {/* AI Lab 路由 */}
               <Route path="/ai-lab" element={<AiLab />} />
-
-              {/* TODO: 后续添加详情页路由 */}
-              {/* <Route path="/writing/:category/:slug" element={<WritingDetail />} /> */}
-              {/* <Route path="/records/:category/:slug" element={<RecordDetail />} /> */}
             </Routes>
           </PageTransition>
         </Container>

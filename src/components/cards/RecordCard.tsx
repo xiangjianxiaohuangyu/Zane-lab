@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { GlassCard } from '../ui/GlassCard';
 import { Badge } from '../ui/Badge';
+import { formatDate } from '@/lib/date';
+import { getRecordCover, getRecordName, formatRating } from '@/lib/records';
+import { RECORD_CATEGORY_MAP } from '@/lib/types';
 import type { Content } from '@/lib/types';
-import type { RecordFrontmatter } from '@/lib/types';
+import type { RecordFrontmatter, RecordCategory } from '@/lib/types';
 
 /**
  * RecordCard 组件属性
@@ -10,230 +13,116 @@ import type { RecordFrontmatter } from '@/lib/types';
 interface RecordCardProps {
   /** 记录内容 */
   record: Content<RecordFrontmatter>;
-  /** 布局变体 */
-  variant?: 'vertical' | 'horizontal';
 }
 
 /**
- * 纵向布局卡片（记录主页）
- *
- * 用于网格布局，所有元素居中对齐
+ * 分类对应的徽章配色
  */
-function VerticalCard({ record, imagePath, extraInfo }: {
-  record: Content<RecordFrontmatter>;
-  imagePath: string | null;
-  extraInfo: string | null;
-}) {
-  const { frontmatter } = record;
+const CATEGORY_VARIANT: Record<RecordCategory, 'primary' | 'pink' | 'blue' | 'green'> = {
+  movie: 'pink',
+  book: 'blue',
+  game: 'green',
+  music: 'primary',
+};
 
+/**
+ * 评分药丸
+ */
+function RatingPill({ rating }: { rating: number }) {
   return (
-    <Link
-      to={`/records/${frontmatter.category}`}
-      className="block h-full"
-    >
-      <GlassCard hover className="h-full flex md:flex-col">
-        {/* 移动端：只显示作品标题 */}
-        <div className="flex-1 flex items-center justify-center p-4 md:hidden">
-          <h3 className="text-lg font-semibold text-text-primary text-center">
-            {frontmatter.title}
-          </h3>
-        </div>
-
-        {/* 桌面端：保持原有纵向布局 */}
-        <div className="hidden md:flex flex-col flex-grow">
-          {/* 图片区域 */}
-          {imagePath && (
-            <div className="w-full h-64">
-              <img
-                src={imagePath}
-                alt={frontmatter.title}
-                className="w-full h-full object-contain"
-                loading="lazy"
-              />
-            </div>
-          )}
-
-          {/* 标题 */}
-          <h3 className="text-xl font-semibold text-text-primary mt-2 mb-1 text-center truncate">
-            {frontmatter.title}
-          </h3>
-
-          {/* 作者/导演/开发商/艺术家 */}
-          {extraInfo && (
-            <p className="text-text-secondary text-sm mb-3 text-center">
-              {extraInfo}
-            </p>
-          )}
-
-          {/* 标签 */}
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <div className="flex gap-2 flex-wrap mb-4 justify-center">
-              {frontmatter.tags.map((tag) => (
-                <Badge key={tag} variant="default">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* 个人感想（如果有） */}
-          {frontmatter.notes && (
-            <p className="text-text-secondary text-sm mb-4 flex-grow line-clamp-3">
-              {frontmatter.notes}
-            </p>
-          )}
-
-          {/* 日期 - 固定在底部 */}
-          <div className="text-sm text-text-secondary text-center mt-auto pt-4 border-t border-glass-200">
-            {new Date(frontmatter.date).toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </div>
-        </div>
-      </GlassCard>
-    </Link>
+    <span className="inline-flex items-center gap-1 !px-3 !py-1 rounded-full text-sm font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+      <svg
+        className="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.07 3.29a1 1 0 00.95.69h3.46c.97 0 1.37 1.24.59 1.81l-2.8 2.03a1 1 0 00-.36 1.12l1.07 3.29c.3.92-.76 1.69-1.54 1.12l-2.8-2.03a1 1 0 00-1.18 0l-2.8 2.03c-.78.57-1.84-.2-1.54-1.12l1.07-3.29a1 1 0 00-.36-1.12L2.98 8.72c-.78-.57-.38-1.81.59-1.81h3.46a1 1 0 00.95-.69L9.05 2.93z" />
+      </svg>
+      {formatRating(rating)}
+    </span>
   );
 }
 
 /**
- * 横向布局卡片（电影详情页）
+ * 记录大卡片组件
  *
- * 用于单列布局，左侧图片，右侧内容，日期在右下角
- */
-function HorizontalCard({ record, imagePath, extraInfo }: {
-  record: Content<RecordFrontmatter>;
-  imagePath: string | null;
-  extraInfo: string | null;
-}) {
-  const { frontmatter } = record;
-
-  return (
-    <Link
-      to={`/records/${frontmatter.category}`}
-      className="block h-full"
-    >
-      <GlassCard hover className="h-full flex flex-row gap-6">
-        {/* 图片区域 */}
-        {imagePath && (
-          <div className="w-48 h-64 flex-shrink-0">
-            <img
-              src={imagePath}
-              alt={frontmatter.title}
-              className="w-full h-full object-contain"
-              loading="lazy"
-            />
-          </div>
-        )}
-
-        {/* 内容区域 */}
-        <div className="flex flex-col flex-1">
-          {/* 标题 */}
-          <h3 className="text-2xl md:text-3xl font-semibold text-text-primary mb-2">
-            {frontmatter.title}
-          </h3>
-
-          {/* 作者/导演/开发商/艺术家 */}
-          {extraInfo && (
-            <p className="text-text-secondary text-base mb-3">
-              {extraInfo}
-            </p>
-          )}
-
-          {/* 标签 */}
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <div className="flex gap-2 flex-wrap mb-4">
-              {frontmatter.tags.map((tag) => (
-                <Badge key={tag} variant="default">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* 个人感想（如果有） */}
-          {frontmatter.notes && (
-            <p className="text-text-secondary text-sm md:text-base indent-4 md:indent-8 flex-grow mb-4">
-              {frontmatter.notes}
-            </p>
-          )}
-
-          {/* 日期 - 固定在底部右侧 */}
-          <div className="text-sm text-text-secondary text-right mt-auto">
-            {new Date(frontmatter.date).toLocaleDateString('zh-CN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </div>
-        </div>
-      </GlassCard>
-    </Link>
-  );
-}
-
-/**
- * 记录卡片组件
- *
- * 用于展示单条记录（电影、书籍、游戏、音乐）的卡片
- * 支持纵向和横向两种布局模式
+ * 一条记录占满一行：左侧封面，右侧标题、分类、创作者、短评与标签
+ * 点击后进入该条记录的详情页
  *
  * @example
  * ```tsx
- * // 纵向布局（列表页）
- * <RecordCard record={recordData} variant="vertical" />
- *
- * // 横向布局（详情页）
- * <RecordCard record={recordData} variant="horizontal" />
+ * <RecordCard record={recordData} />
  * ```
  */
-export function RecordCard({ record, variant = 'vertical' }: RecordCardProps) {
-  const { frontmatter } = record;
+export function RecordCard({ record }: RecordCardProps) {
+  const { frontmatter, slug } = record;
+  const cover = getRecordCover(frontmatter);
+  const creator = getRecordName(frontmatter);
+  const categoryLabel = RECORD_CATEGORY_MAP[frontmatter.category] ?? '记录';
 
-  // 分类到目录名的映射（单数 -> 复数）
-  const categoryDirMap: Record<string, string> = {
-    movie: 'movies',
-    book: 'books',
-    game: 'games',
-    music: 'music',
-  };
+  return (
+    <Link to={`/records/${slug}`} className="block h-full">
+      <GlassCard hover className="h-full flex flex-row gap-6 !px-6 !py-6">
+        {/* 封面 */}
+        <div className="w-28 h-40 md:w-36 md:h-52 flex-shrink-0 rounded-xl overflow-hidden bg-glass-100 border border-glass-200">
+          {cover ? (
+            <img
+              src={cover}
+              alt={frontmatter.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-text-secondary/60 text-sm">
+              {categoryLabel}
+            </div>
+          )}
+        </div>
 
-  const categoryDir = categoryDirMap[frontmatter.category] || frontmatter.category;
+        {/* 内容 */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* 标题行：分类 + 标题 + 评分 */}
+          <div className="flex items-start gap-3 mb-2">
+            <Badge variant={CATEGORY_VARIANT[frontmatter.category]}>
+              {categoryLabel}
+            </Badge>
+            <h3 className="flex-1 min-w-0 text-2xl font-semibold text-text-primary leading-tight truncate">
+              {frontmatter.title}
+            </h3>
+            {frontmatter.rating !== null &&
+              frontmatter.rating !== undefined && (
+                <RatingPill rating={frontmatter.rating} />
+              )}
+          </div>
 
-  // 构建图片路径
-  const imagePath = frontmatter.cover
-    ? `/images/records/${categoryDir}/${frontmatter.cover}`
-    : null;
+          {/* 创作者 */}
+          {creator && (
+            <p className="text-text-secondary text-sm mb-3">{creator}</p>
+          )}
 
-  // 调试日志
-  if (frontmatter.cover) {
-    console.log(`[RecordCard] ${frontmatter.title} cover:`, frontmatter.cover);
-    console.log(`[RecordCard] Image path:`, imagePath);
-  } else {
-    console.log(`[RecordCard] ${frontmatter.title} has no cover`);
-  }
+          {/* 短评 */}
+          {frontmatter.notes && (
+            <p className="text-text-secondary mb-4 line-clamp-2 flex-grow">
+              {frontmatter.notes}
+            </p>
+          )}
 
-  // 根据分类获取额外信息
-  const extraInfo = (() => {
-    switch (frontmatter.category) {
-      case 'book':
-        return frontmatter.author ?? null;
-      case 'movie':
-        return frontmatter.director ?? null;
-      case 'game':
-        return frontmatter.developer ?? null;
-      case 'music':
-        return frontmatter.artist ?? null;
-      default:
-        return null;
-    }
-  })();
+          {/* 底部：标签 + 日期 */}
+          <div className="flex items-end justify-between gap-4 mt-auto pt-4 border-t border-glass-200">
+            <div className="flex gap-2 flex-wrap">
+              {frontmatter.tags.map((tag) => (
+                <Badge key={tag} variant="default">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
 
-  // 根据 variant 返回对应的组件
-  if (variant === 'horizontal') {
-    return <HorizontalCard record={record} imagePath={imagePath} extraInfo={extraInfo} />;
-  }
-
-  return <VerticalCard record={record} imagePath={imagePath} extraInfo={extraInfo} />;
+            <span className="text-sm text-text-secondary whitespace-nowrap">
+              {formatDate(frontmatter.date)}
+            </span>
+          </div>
+        </div>
+      </GlassCard>
+    </Link>
+  );
 }

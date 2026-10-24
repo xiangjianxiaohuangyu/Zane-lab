@@ -2,7 +2,7 @@
 /**
  * Markdown 渲染样式变体
  */
-export type MarkdownStyle = 'default' | 'writing' | 'project' | 'poetry';
+export type MarkdownStyle = 'default' | 'writing' | 'project' | 'poetry' | 'record';
 
 /**
  * 样式配置映射
@@ -27,9 +27,9 @@ const STYLE_CONFIGS: Record<MarkdownStyle, string> = {
         prose-p:indent-8                 /* 段落首行缩进：2rem */
         prose-p:mb-6                     /* 段落下边距 */
         prose-p:text-lg                 /* 段落字体：18px */
-        prose-p:text-text-secondary     /* 段落颜色：次要文字色 */
+        prose-p:text-text-primary     /* 段落颜色：主要文字色（白色） */
         prose-p:leading-loose     /* 行间距：1.25，紧凑 */
-        
+
         /* 引用块 - <blockquote> */
         prose-blockquote:border-l-4      /* 引用左侧边框 */
         prose-blockquote:border-glass-300 /* 边框颜色 */
@@ -39,7 +39,35 @@ const STYLE_CONFIGS: Record<MarkdownStyle, string> = {
         prose-blockquote:my-2           /* 上下外边距 */
         prose-blockquote:text-text-secondary  /* 文字颜色 */
         prose-blockquote:italic          /* 斜体 */
+        [&_blockquote_p]:text-text-secondary  /* 引用块内的段落保持次要文字色 */
 
+  `,
+
+  // Record 样式：记录正文，段落用主要文字色（白色），区别于写作页的次要文字色
+  record: `
+        /* 标题样式 - <h1>-<h6> */
+        prose-headings:font-bold       /* 标题字重：粗体 */
+        prose-headings:text-text-primary  /* 标题颜色 */
+        prose-headings:mt-6             /* 标题上边距 */
+        prose-headings:mb-3             /* 标题下边距 */
+        prose-headings:leading-tight     /* 标题行高：紧凑 */
+
+        /* 段落样式 - <p> */
+        prose-p:indent-8                 /* 段落首行缩进：2rem */
+        prose-p:mb-6                     /* 段落下边距 */
+        prose-p:text-lg                 /* 段落字体：18px */
+        prose-p:text-text-primary     /* 段落颜色：主要文字色（白色） */
+        prose-p:leading-loose     /* 行间距：1.25，紧凑 */
+
+        /* 图片 - <img> */
+        prose-img:rounded-lg             /* 图片圆角 */
+        prose-img:shadow-lg              /* 图片阴影 */
+        prose-img:my-6                   /* 上下外边距 */
+        prose-img:mx-auto                 /* 水平居中 */
+        prose-img:max-w-full              /* 不超出容器宽度 */
+        prose-img:cursor-zoom-in         /* 放大镜光标，提示可点开 */
+        [&_img]:transition-opacity        /* 悬停渐变 */
+        [&_img]:hover:opacity-80
   `,
 
   // Project 样式：技术性内容，信息密度高

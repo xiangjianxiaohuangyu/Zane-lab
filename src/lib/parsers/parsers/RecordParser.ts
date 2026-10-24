@@ -2,17 +2,22 @@
  * Record 专属解析器
  *
  * 处理记录类型的 Markdown 文件（电影、书籍、游戏、音乐）
+ *
+ * content/records/ 下一个 .md 文件 = 一条记录，
+ * 记录属于哪一类由 frontmatter 的 category 字段决定
  */
 
 import { BaseParser } from '../base/BaseParser';
-import type { RecordFrontmatter } from '../../types';
-import type { ValidationResult, ValidationError, ValidationWarning, ParseResult } from '../base/ParserInterface';
+import { RemarkProcessor } from '../utils/RemarkProcessor';
+import { createRecordImageHandler } from '../utils/RecordImageHandler';
+import type { RecordFrontmatter, RecordCategory } from '../../types';
+import type { ValidationResult, ValidationError, ValidationWarning } from '../base/ParserInterface';
 
 /**
  * Record 解析器
  *
  * 验证和解析记录 frontmatter，支持：
- * - Category 验证（movie/book/game/music）
+ * - 从文件路径推断 Category（movie/book/game/music）
  * - Category 专属字段验证
  * - Rating 范围验证（1-10）
  * - 必填字段验证
@@ -22,23 +27,28 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
 
   /**
    * Category 专属字段配置
+   *
+   * 创作者统一用 name 字段记录，各分类只有 cover 是自有可选字段
    */
-  private readonly categoryFields = {
+  private readonly categoryFields: Record<RecordCategory, {
+    optionalFields: string[];
+    recommendedFields: string[];
+  }> = {
     movie: {
-      optionalFields: ['director', 'cover'],
-      recommendedFields: ['director'],
+      optionalFields: ['name', 'cover'],
+      recommendedFields: ['name'],
     },
     book: {
-      optionalFields: ['author', 'cover'],
-      recommendedFields: ['author'],
+      optionalFields: ['name', 'cover'],
+      recommendedFields: ['name'],
     },
     game: {
-      optionalFields: ['developer', 'cover'],
-      recommendedFields: ['developer'],
+      optionalFields: ['name', 'cover'],
+      recommendedFields: ['name'],
     },
     music: {
-      optionalFields: ['artist', 'cover'],
-      recommendedFields: ['artist'],
+      optionalFields: ['name', 'cover'],
+      recommendedFields: ['name'],
     },
   };
 
@@ -54,7 +64,7 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
     errors.push(...this.validateRequiredFields(data, requiredFields));
 
     // 2. 验证 category 枚举
-    const validCategories = ['movie', 'book', 'game', 'music'];
+    const validCategories: RecordCategory[] = ['movie', 'book', 'game', 'music'];
     const categoryError = this.validateEnum(data, 'category', validCategories);
     if (categoryError) errors.push(categoryError);
 
@@ -72,7 +82,28 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
       if (ratingError) errors.push(ratingError);
     }
 
-    // 6. Category 专属字段验证
+    // 6. 验证 images 是字符串数组（如果提供）
+    // severity 用 'error' 而非 'critical'：图集字段写错不应导致整条记录加载失败
+    if (data.images !== undefined) {
+      const imagesError = this.validateArray(data, 'images');
+      if (imagesError) {
+        errors.push(imagesError);
+      } else {
+        const invalidIndex = (data.images as unknown[]).findIndex(
+          (item) => typeof item !== 'string'
+        );
+        if (invalidIndex !== -1) {
+          errors.push({
+            field: 'images',
+            message: `'images' 第 ${invalidIndex + 1} 项必须是字符串（图片文件名）`,
+            severity: 'error',
+            value: (data.images as unknown[])[invalidIndex],
+          });
+        }
+      }
+    }
+
+    // 7. Category 专属字段验证
     if (data.category) {
       const categoryWarnings = this.validateCategorySpecificFields(data);
       warnings.push(...categoryWarnings);
@@ -94,7 +125,7 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
     data: Record<string, any>
   ): ValidationWarning[] {
     const warnings: ValidationWarning[] = [];
-    const category = data.category as keyof typeof this.categoryFields;
+    const category = data.category as RecordCategory;
 
     if (!category || !this.categoryFields[category]) {
       return warnings;
@@ -120,6 +151,7 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
    * 处理 Record 专属的 frontmatter
    *
    * - 确保 tags 数组存在
+   * - 确保 images 数组存在
    * - 设置默认值
    */
   protected async processFrontmatter(
@@ -129,6 +161,7 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
     const defaults = {
       tags: data.tags || [],
       rating: data.rating ?? null, // 明确设置为 null 而不是 undefined
+      images: Array.isArray(data.images) ? data.images : [],
     };
 
     return {
@@ -138,100 +171,15 @@ export class RecordParser extends BaseParser<RecordFrontmatter> {
   }
 
   /**
-   * 解析包含多个记录的文件
+   * 处理 Record 正文内容
    *
-   * 用于解析单个文件中包含多个连续 frontmatter 块的格式
-   * 每个块使用 `---` 分隔符分隔
+   * 覆写基类实现，为正文里的图片注入可点击 / 可聚焦的标记，
+   * 便于详情页通过事件委托打开灯箱
    *
-   * @param file - 包含多个 frontmatter 块的文件内容
-   * @param category - 记录分类（movie/book/game/music）
-   * @returns 解析后的记录数组
+   * @param content - Markdown 原始内容
+   * @returns HTML 字符串
    */
-  async parseMultiRecords(
-    file: string,
-    category: string
-  ): Promise<ParseResult<RecordFrontmatter>[]> {
-    // 统一换行符为 Unix 格式 (\n)
-    let content = file.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-
-    // 移除文件开头和结尾的空白
-    content = content.trim();
-
-    // 移除开头的 ---（如果有）
-    if (content.startsWith('---')) {
-      content = content.substring(3).trim();
-    }
-
-    // 按 \n---\n 分割文件内容
-    const rawBlocks = content.split(/\n---\n/);
-
-    // 清理每个块：移除开头的 --- 和空白
-    const blocks = rawBlocks
-      .map((block) => {
-        // 移除块开头的 ---（如果有）
-        let cleaned = block.trim();
-        if (cleaned.startsWith('---')) {
-          cleaned = cleaned.substring(3).trim();
-        }
-        return cleaned;
-      })
-      .filter((block) => block.trim());
-
-    // 为每个块添加开头的 ---，使其成为有效的 frontmatter 格式
-    // 使用 Promise.allSettled 而不是 Promise.all，这样单个块解析失败不会影响其他块
-    const settledResults = await Promise.allSettled(
-      blocks.map(async (block, index) => {
-        // 生成唯一 slug：分类 + 内容哈希
-        const slug = this.generateSlug(block, category, index);
-        // 添加开头的 ---
-        const formattedBlock = `---\n${block}`;
-        const result = await this.parse(formattedBlock, slug);
-        return result;
-      })
-    );
-
-    // 过滤出成功解析的结果，记录失败的块
-    const results: ParseResult<RecordFrontmatter>[] = [];
-    settledResults.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        results.push(result.value);
-      } else {
-        console.error(
-          `[RecordParser] Failed to parse ${category} record at index ${index}:`,
-          result.reason
-        );
-      }
-    });
-
-    console.log(`[RecordParser] Successfully parsed ${results.length}/${blocks.length} ${category} records`);
-
-    return results;
-  }
-
-  /**
-   * 为记录生成唯一的 slug
-   *
-   * 使用内容的简单哈希算法生成唯一标识符
-   *
-   * @param content - 记录内容
-   * @param category - 记录分类
-   * @param index - 记录在文件中的索引
-   * @returns 唯一的 slug
-   */
-  private generateSlug(content: string, category: string, index: number): string {
-    // 简单哈希算法
-    let hash = 0;
-    const str = content + index;
-
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-
-    // 转为正数并取十六进制
-    const hexHash = Math.abs(hash).toString(16).padStart(8, '0');
-
-    return `${category}-${hexHash}`;
+  protected async processContent(content: string): Promise<string> {
+    return RemarkProcessor.processWithImageHandler(content, createRecordImageHandler());
   }
 }
